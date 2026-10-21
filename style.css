@@ -1,0 +1,94 @@
+body, html { overflow-x: hidden; }
+
+.auto-table { table-layout: auto; }
+
+.auto-table th, .auto-table td {
+    word-wrap: break-word; overflow-wrap: break-word;
+    padding: 0.25rem 0.2rem; font-size: 0.65rem; vertical-align: middle;
+}
+
+@media (min-width: 640px) {
+    .auto-table th, .auto-table td { padding: 0.3rem 0.4rem; font-size: 0.7rem; }
+}
+
+/* FIX: Tinanggal ang display property para mapalitan ng Responsive Class sa JS */
+.account-logo { max-height: 1.25rem; width: auto; max-width: 100%; object-fit: contain; }
+@media (min-width: 640px) { .account-logo { max-height: 1.5rem; } }
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+.loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px;}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.fade-in-tab { animation: fadeIn 0.8s ease-in-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+   PERFECT 40px COLUMN FIX
+========================================= */
+.fixed-40 {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    padding: 0 !important; 
+    text-align: center !important;
+    overflow: hidden;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+}
+
+.edit-input { 
+    width: 28px !important; 
+    min-width: 28px !important; 
+    max-width: 28px !important; 
+    height: 22px !important;
+    margin: 0 auto !important;
+    padding: 0 !important; 
+    text-align: center !important; 
+    border: 1px solid #9ca3af; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    color: #1d4ed8; 
+    outline: none; 
+    font-size: 11px; 
+    display: block;
+    box-sizing: border-box;
+    -moz-appearance: textfield; 
+}
+
+.edit-input::-webkit-inner-spin-button, 
+.edit-input::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+.btn-add-seq {
+    background-color: #f0f9ff; color: #0284c7; border: 1px dashed #7dd3fc; border-radius: 4px;
+    width: 28px !important; 
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 22px !important; 
+    font-weight: bold; font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.btn-add-seq:hover { background-color: #bae6fd; border-color: #38bdf8; }
+
+.blink-bg { animation: blinkRow 1s infinite; border: 2px solid #ef4444; }
+@keyframes blinkRow {
+    0%, 100% { background-color: #fee2e2; }
+    50% { background-color: #fca5a5; }
+}
+
+.customer-name-col {
+    min-width: 150px;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
