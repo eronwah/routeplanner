@@ -11,8 +11,8 @@
 </head>
 <body class="bg-gray-50 font-sans min-h-screen text-gray-800 pb-12 relative">
 
-    <div class="container mx-auto p-2 sm:p-6 max-w-[95%] xl:max-w-[98%]">
-        <h1 class="text-xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 border-b border-gray-200 pb-2 sm:pb-4 text-center">Route List Planner</h1>
+    <div class="container mx-auto p-1 sm:p-6 max-w-[98%] xl:max-w-[98%]">
+        <h1 class="text-lg sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-6 border-b border-gray-200 pb-2 sm:pb-4 text-center">Route List Planner</h1>
 
         <div class="bg-white p-3 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-4 sm:mb-6 w-full max-w-4xl mx-auto">
             <h2 class="text-sm sm:text-lg font-bold mb-2 sm:mb-3 text-gray-700">Upload Main Data (.xlsx)</h2>
@@ -21,7 +21,7 @@
                     file:mr-2 sm:file:mr-4 file:py-1.5 sm:file:py-2.5 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:font-semibold
                     file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg p-1.5 sm:p-2 transition">
             </div>
-            <p id="uploadStatus" class="mt-1 sm:mt-2 text-[10px] sm:text-sm text-gray-500 italic">Upload an Excel file to unlock Insights and Lookups.</p>
+            <p id="uploadStatus" class="mt-1 sm:mt-2 text-[9px] sm:text-sm text-gray-500 italic">Upload an Excel file to unlock Insights and Lookups.</p>
         </div>
 
         <div id="mainContentContainer" class="w-full">
@@ -33,12 +33,13 @@
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-graphs">Graphs</button>
             </div>
 
+            <!-- ROUTE PLANNER MASTERLIST -->
             <div id="section-masterlist" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full">
                 
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b border-gray-200 pb-3 gap-3">
-                    <h2 class="text-base sm:text-lg font-bold text-gray-700 flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 border-b border-gray-200 pb-3 gap-3">
+                    <h2 class="text-sm sm:text-lg font-bold text-gray-700 flex items-center gap-2">
                         Route Planner (Cloud)
-                        <span id="cloudStatusIndicator" class="text-[10px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">Connecting...</span>
+                        <span id="cloudStatusIndicator" class="text-[9px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">Connecting...</span>
                     </h2>
                     
                     <div class="hidden lg:flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
@@ -57,34 +58,33 @@
                     </div>
                 </div>
 
-                <div class="block lg:hidden bg-red-50 border border-red-200 p-6 rounded-lg text-center my-6 shadow-sm mx-auto max-w-md">
-                    <p class="text-red-800 font-bold text-sm sm:text-base mb-2">🖥️ Desktop Access Only</p>
-                    <p class="text-red-700 text-xs sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
+                <div class="block lg:hidden bg-red-50 border border-red-200 p-4 sm:p-6 rounded-lg text-center my-4 shadow-sm mx-auto max-w-md">
+                    <p class="text-red-800 font-bold text-[11px] sm:text-base mb-1">🖥️ Desktop Access Only</p>
+                    <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
                 </div>
 
                 <div class="hidden lg:block w-full mx-auto border border-gray-200 rounded-md overflow-x-auto max-h-[75vh] overflow-y-auto relative bg-white shadow-sm pb-16">
                     <table class="w-full bg-white text-left text-xs whitespace-nowrap auto-table min-w-[1000px]">
                         <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-                            <tr>
-                                <th rowspan="2" class="p-2 border-r border-gray-200 text-center w-[70px] bg-gray-100 sticky left-0 z-30">Action</th>
-                                <th rowspan="2" class="p-2 border-r border-gray-200 text-center w-[40px] bg-gray-100">Line</th>
-                                <th rowspan="2" class="p-2 border-r border-gray-200 text-center bg-gray-100">Code</th>
-                                <th rowspan="2" class="p-2 border-r border-gray-200 bg-gray-100 customer-name-col">Customer Name</th>
-                                <!-- BAGO: ACCOUNT COLUMN -->
-                                <th rowspan="2" class="p-2 border-r border-gray-200 bg-gray-100 text-center">Account</th>
+                            <tr class="text-[9px] sm:text-[10px]">
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[60px] bg-gray-100 sticky left-0 z-30">Action</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[30px] bg-gray-100">Line</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center bg-gray-100">Code</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 customer-name-col">Customer Name</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 text-center">Account</th>
                                 <th rowspan="2" class="fixed-40 border-r border-gray-200 bg-gray-100 align-middle text-center" title="Auto-computed Frequency">
                                     <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Freq</div>
                                 </th>
-                                <th colspan="5" class="p-1 border-r border-gray-200 text-center bg-emerald-50 text-emerald-800">Week 1</th>
-                                <th colspan="5" class="p-1 border-r border-gray-200 text-center bg-rose-50 text-rose-800">Week 2</th>
-                                <th colspan="5" class="p-1 border-r border-gray-200 text-center bg-amber-50 text-amber-800">Week 3</th>
-                                <th colspan="5" class="p-1 border-r border-gray-200 text-center bg-cyan-50 text-cyan-800">Week 4</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-emerald-50 text-emerald-800">Week 1</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-rose-50 text-rose-800">Week 2</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-amber-50 text-amber-800">Week 3</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-cyan-50 text-cyan-800">Week 4</th>
                             </tr>
-                            <tr class="bg-gray-50 border-b border-gray-300 text-gray-500 text-[10px]">
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-1 text-center border-r">Sa</th><th class="hidden p-1 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-1 text-center border-r">Sa</th><th class="hidden p-1 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-1 text-center border-r">Sa</th><th class="hidden p-1 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-1 text-center border-r">Sa</th><th class="hidden p-1 text-center border-r">Su</th>
+                            <tr class="bg-gray-50 border-b border-gray-300 text-gray-500 text-[8px] sm:text-[9px]">
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
                             </tr>
                         </thead>
                         <tbody id="masterlistTableBody">
@@ -110,24 +110,24 @@
                 <h2 class="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-gray-700">Lookup Route</h2>
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3 mb-4 sm:mb-6 w-full">
                     <div class="w-full sm:w-64">
-                        <label class="block text-xs sm:text-sm font-bold text-gray-700 mb-1">Select Day/Week</label>
-                        <select id="daySelector" class="border border-gray-300 rounded-lg p-2 sm:p-2.5 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-xs sm:text-sm outline-none cursor-pointer" disabled>
+                        <label class="block text-[10px] sm:text-sm font-bold text-gray-700 mb-1">Select Day/Week</label>
+                        <select id="daySelector" class="border border-gray-300 rounded-lg p-1.5 sm:p-2.5 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-[10px] sm:text-sm outline-none cursor-pointer" disabled>
                             <option value="">-- Select --</option>
                         </select>
                     </div>
                 </div>
                 
-                <div id="totalCount" class="mb-5 w-full flex justify-center hidden"></div>
+                <div id="totalCount" class="mb-4 w-full flex justify-center hidden"></div>
                 
                 <div class="w-full border border-gray-200 rounded-md overflow-hidden">
-                    <table class="w-full table-auto bg-white text-left text-xs sm:text-sm">
+                    <table class="w-full table-auto bg-white text-left text-[9px] sm:text-sm">
                         <thead class="bg-gray-100 border-b border-gray-200">
-                            <tr>
-                                <th class="font-bold text-gray-800 text-center w-[12%] p-2">Seq</th>
-                                <th class="font-bold text-gray-800 text-center w-[18%] p-2">Code</th>
-                                <th class="font-bold text-gray-800 text-center w-[35%] p-2">Customer</th>
-                                <th class="font-bold text-gray-800 text-center w-[15%] p-2">Account</th>
-                                <th class="font-bold text-gray-800 text-center w-[20%] p-2">City</th>
+                            <tr class="text-[9px] sm:text-[11px]">
+                                <th class="font-bold text-gray-800 text-center w-[12%] p-1 sm:p-2">Seq</th>
+                                <th class="font-bold text-gray-800 text-center w-[18%] p-1 sm:p-2">Code</th>
+                                <th class="font-bold text-gray-800 text-center w-[35%] p-1 sm:p-2">Customer</th>
+                                <th class="font-bold text-gray-800 text-center w-[15%] p-1 sm:p-2">Account</th>
+                                <th class="font-bold text-gray-800 text-center w-[20%] p-1 sm:p-2">City</th>
                             </tr>
                         </thead>
                         <tbody id="resultTableBody">
@@ -140,36 +140,36 @@
             <!-- ================= DYNAMIC PIVOT SECTION ================= -->
             <div id="section-pivot" class="bg-transparent w-full hidden">
                 <div class="mb-4 sm:mb-6 flex justify-between items-center bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <h2 class="text-sm sm:text-lg font-bold text-gray-700">Dynamic Pivot Dashboard</h2>
-                    <span class="bg-yellow-300 font-bold border border-yellow-400 rounded px-2 sm:px-4 py-1 text-xs sm:text-base shadow-sm">Total: <span id="pivot-total-accounts">0</span></span>
+                    <h2 class="text-xs sm:text-lg font-bold text-gray-700">Dynamic Pivot Dashboard</h2>
+                    <span class="bg-yellow-300 font-bold border border-yellow-400 rounded px-2 sm:px-4 py-0.5 sm:py-1 text-[9px] sm:text-base shadow-sm">Total: <span id="pivot-total-accounts">0</span></span>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 w-full">
                     <div class="w-full"><div id="pivot-weekly-tables" class="w-full flex flex-col gap-3 sm:gap-5"></div></div>
                     <div class="w-full flex flex-col gap-4 sm:gap-6">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
-                            <table class="w-full table-auto text-center text-xs sm:text-sm">
+                            <table class="w-full table-auto text-center text-[9px] sm:text-sm">
                                 <thead>
-                                    <tr><th colspan="6" class="bg-blue-500 text-white font-bold py-1.5 sm:py-2 text-center">Count of Frequency</th></tr>
-                                    <tr class="bg-blue-100 text-gray-700 border-b border-gray-300">
-                                        <th class="text-center font-bold p-2 w-auto">Account</th>
-                                        <th class="font-bold p-2 text-center">1</th><th class="font-bold p-2 text-center">2</th>
-                                        <th class="font-bold p-2 text-center">3</th><th class="font-bold p-2 text-center">4</th>
-                                        <th class="font-bold p-2 text-center">Total</th>
+                                    <tr><th colspan="6" class="bg-blue-500 text-white font-bold py-1.5 sm:py-2 text-center text-[10px] sm:text-sm">Count of Frequency</th></tr>
+                                    <tr class="bg-blue-100 text-gray-700 border-b border-gray-300 text-[9px] sm:text-[11px]">
+                                        <th class="text-center font-bold p-1 sm:p-1.5 w-auto">Account</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">1</th><th class="font-bold p-1 sm:p-1.5 text-center">2</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">3</th><th class="font-bold p-1 sm:p-1.5 text-center">4</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pivot-freq-body"><tr><td colspan="6" class="py-4 text-gray-500">No data available</td></tr></tbody>
                             </table>
                         </div>
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
-                            <table class="w-full table-auto text-center text-xs sm:text-sm">
+                            <table class="w-full table-auto text-center text-[9px] sm:text-sm">
                                 <thead>
-                                    <tr><th colspan="6" class="bg-gray-600 text-white font-bold py-1.5 sm:py-2 text-center">Weekly visit count per Account</th></tr>
-                                    <tr class="bg-gray-100 text-gray-700 border-b border-gray-300">
-                                        <th class="text-center font-bold p-2 w-auto">Account</th>
-                                        <th class="font-bold p-2 text-center">1</th><th class="font-bold p-2 text-center">2</th>
-                                        <th class="font-bold p-2 text-center">3</th><th class="font-bold p-2 text-center">4</th>
-                                        <th class="font-bold p-2 text-center">Total</th>
+                                    <tr><th colspan="6" class="bg-gray-600 text-white font-bold py-1.5 sm:py-2 text-center text-[10px] sm:text-sm">Weekly visit count per Account</th></tr>
+                                    <tr class="bg-gray-100 text-gray-700 border-b border-gray-300 text-[9px] sm:text-[11px]">
+                                        <th class="text-center font-bold p-1 sm:p-1.5 w-auto">Account</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">1</th><th class="font-bold p-1 sm:p-1.5 text-center">2</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">3</th><th class="font-bold p-1 sm:p-1.5 text-center">4</th>
+                                        <th class="font-bold p-1 sm:p-1.5 text-center">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pivot-visit-body"><tr><td colspan="6" class="py-4 text-gray-500">No data available</td></tr></tbody>
@@ -201,14 +201,14 @@
                     <div class="border border-gray-200 rounded-xl p-4 shadow-sm relative w-full flex flex-col transition hover:shadow-md bg-white">
                         <h3 class="text-center text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">Daily Breakdown</h3>
                         <div class="relative flex-1 min-h-[200px] sm:min-h-[250px]"><canvas id="barChart"></canvas></div>
-                        <div id="barChartAnalysis" class="mt-4 p-3 bg-blue-50 text-blue-800 text-[10px] sm:text-xs rounded-lg border border-blue-100 leading-relaxed hidden"></div>
+                        <div id="barChartAnalysis" class="mt-4 p-3 bg-blue-50 text-blue-800 text-[9px] sm:text-xs rounded-lg border border-blue-100 leading-relaxed hidden"></div>
                     </div>
                     <div class="border border-gray-200 rounded-xl p-4 shadow-sm relative w-full flex flex-col transition hover:shadow-md bg-white">
                         <h3 class="text-center text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Total Weekly Distribution</h3>
                         <hr class="border-gray-200 mb-2">
-                        <p class="text-[10px] sm:text-xs text-gray-400 italic text-center mb-3">Double-click on the doughnut chart segment to view the detailed customer list.</p>
+                        <p class="text-[9px] sm:text-xs text-gray-400 italic text-center mb-3">Double-click on the doughnut chart segment to view the detailed customer list.</p>
                         <div class="relative flex-1 min-h-[200px] sm:min-h-[250px]"><canvas id="doughnutChart"></canvas></div>
-                        <div id="doughnutChartAnalysis" class="mt-4 p-3 bg-emerald-50 text-emerald-800 text-[10px] sm:text-xs rounded-lg border border-emerald-100 leading-relaxed hidden"></div>
+                        <div id="doughnutChartAnalysis" class="mt-4 p-3 bg-emerald-50 text-emerald-800 text-[9px] sm:text-xs rounded-lg border border-emerald-100 leading-relaxed hidden"></div>
                     </div>
                 </div>
             </div>
@@ -262,12 +262,11 @@
         </div>
     </div>
 
-    <!-- OTHER MODALS -->
     <div id="customerModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-4 sm:p-5 relative"><button id="closeModalBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2 text-center">Customer Details</h3><div id="modalContent" class="w-full"></div><div class="mt-4 text-center"><button id="closeModalBtnBottom" class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full">Close</button></div></div></div>
     <div id="weeklyModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative flex flex-col max-h-[85vh]"><div id="weeklyModalHeader" class="rounded-t-xl px-4 py-3 sm:px-5 sm:py-4 flex justify-between items-center transition-colors"><h3 id="weeklyModalTitle" class="text-lg font-bold text-white">Week Details</h3><button id="closeWeeklyModalBtn" class="text-white hover:text-gray-200 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div id="weeklyModalContent" class="p-4 sm:p-5 overflow-y-auto space-y-3 bg-gray-50 flex-1"></div><div class="p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeWeeklyModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>
     <div id="graphModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-md w-full relative flex flex-col max-h-[85vh]"><div class="px-4 py-3 sm:px-4 sm:py-4 flex justify-between items-center bg-gray-50 border-b border-gray-200 rounded-t-xl"><h3 id="graphModalTitle" class="text-[13px] sm:text-sm font-bold text-gray-800 uppercase tracking-wide"></h3><button id="closeGraphModalBtn" class="text-gray-400 hover:text-gray-600 focus:outline-none ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div class="p-4 sm:p-5 overflow-y-auto flex-1"><div class="grid grid-cols-[auto_1fr] gap-x-4 text-xs sm:text-sm min-w-full" id="graphModalContent"></div></div><div class="p-3 sm:p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeGraphModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>
 
     <script src="app.js"></script>
-    <script src="route_planner.js"></script> <!-- Idagdag ang bagong file na ito -->
+    <script src="route_planner.js"></script>
 </body>
 </html>

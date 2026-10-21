@@ -10,7 +10,6 @@ window.globalExcelData = [];
 let myBarChart = null;
 let myDoughnutChart = null;
 
-// I-export sa window object para magamit ng route_planner.js
 window.allDays = [
     'Mon1', 'Tue1', 'Wed1', 'Thu1', 'Fri1', 'Sat1', 'Sun1',
     'Mon2', 'Tue2', 'Wed2', 'Thu2', 'Fri2', 'Sat2', 'Sun2',
@@ -65,7 +64,7 @@ const closeGraphModalBtnBottom = document.getElementById('closeGraphModalBtnBott
 window.isValidCell = (val) => { return typeof val === 'number' && !isNaN(val); };
 window.isValidStrNum = (val) => { return val !== null && val !== undefined && val !== '' && !isNaN(parseFloat(val)); };
 
-// FIX: MOBILE VIEW = LOGO | WEB VIEW = TEXT
+// FIX PARA SA MOBILE LOGOS: Striktong binalot sa isang 14px na div na may overflow hidden.
 window.getAccountLogo = (accountName) => {
     if (!accountName || accountName === '-') return '-';
     const acc = accountName.toString().toUpperCase();
@@ -77,14 +76,15 @@ window.getAccountLogo = (accountName) => {
     else if (acc === 'RS' || acc.includes('ROBINSONS')) imgSrc = 'robinsons.png';
 
     if (imgSrc) {
-        // sm:hidden = lalabas lang kapag mobile. hidden sm:inline-block = lalabas lang sa tablet pataas (web)
         return `
-            <img src="${imgSrc}" alt="${accountName}" class="account-logo inline-block sm:hidden" loading="lazy">
-            <span class="font-medium hidden sm:inline-block">${accountName}</span>
+            <div class="sm:hidden w-full flex items-center justify-center" style="height: 14px; overflow: hidden;">
+                <img src="${imgSrc}" alt="${accountName}" style="height: 100%; width: auto; max-width: 45px; object-fit: contain; display: block; margin: 0 auto;" loading="lazy">
+            </div>
+            <span class="font-medium hidden sm:inline-block text-[8px] sm:text-[10px]">${accountName}</span>
         `;
     }
 
-    return `<span class="font-medium">${accountName}</span>`;
+    return `<span class="font-medium text-[8px] sm:text-[10px]">${accountName}</span>`;
 };
 
 window.disableScroll = () => { document.body.classList.add('overflow-hidden'); document.documentElement.classList.add('overflow-hidden'); };
@@ -125,7 +125,7 @@ fileInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
     uploadStatus.innerHTML = `Reading file, please wait...`;
-    uploadStatus.className = "mt-1 sm:mt-2 text-blue-600 font-semibold text-[10px] sm:text-sm";
+    uploadStatus.className = "mt-1 sm:mt-2 text-blue-600 font-semibold text-[9px] sm:text-sm";
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -135,7 +135,7 @@ fileInput.addEventListener('change', function(e) {
         
         if(!workbook.SheetNames.includes(sheetName)) {
             uploadStatus.innerHTML = `Error: Sheet not found. <br><span class="text-red-700">Make sure the exact tab name is <b>"IC003CAB OCTOBER - FINAL"</b>.</span>`;
-            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[10px] sm:text-sm";
+            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
             return;
         }
         
@@ -143,14 +143,14 @@ fileInput.addEventListener('change', function(e) {
         
         if (parsedData.length === 0 || (!parsedData[0].hasOwnProperty('Customer Name') && !parsedData[0].hasOwnProperty('Account'))) {
             uploadStatus.innerHTML = `Error: Invalid data format. <br><span class="text-red-700">Missing <b>Customer Name</b> or <b>Account</b>.</span>`;
-            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[10px] sm:text-sm";
+            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
             window.globalExcelData = [];
             return;
         }
 
         window.globalExcelData = parsedData;
         uploadStatus.innerHTML = `Success! File data loaded. Analytics and Lookup are now unlocked.`;
-        uploadStatus.className = "mt-1 sm:mt-2 text-green-600 font-semibold text-[10px] sm:text-sm";
+        uploadStatus.className = "mt-1 sm:mt-2 text-green-600 font-semibold text-[9px] sm:text-sm";
 
         daySelector.innerHTML = '<option value="">-- Select --</option>';
         window.allDays.forEach(day => {
@@ -205,7 +205,7 @@ function performSearch() {
     let fullDayName = window.dayNamesMap[dayPrefix] || dayPrefix;
 
     totalCount.innerHTML = `
-        <div class="inline-flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full px-4 py-2 text-xs sm:text-sm font-bold text-gray-700 w-auto">
+        <div class="inline-flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full px-3 py-1.5 text-[9px] sm:text-xs font-bold text-gray-700 w-auto">
             <span class="text-blue-600 uppercase tracking-wide">Week ${weekNum}</span>
             <span class="mx-3 text-gray-300">|</span>
             <span class="text-gray-800">${fullDayName}</span>
@@ -230,13 +230,14 @@ function performSearch() {
             codeHTML = `<span class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition" onclick="openCustomerModal('${customerCode}')">${customerCode}</span>`;
         }
 
+        // FIX: Pinaliit nang husto (8px at 9px)
         resultTableBody.innerHTML += `
         <tr class="hover:bg-blue-50 transition border-b border-gray-100">
-            <td class="font-semibold text-gray-800 text-center">${row[selectedDay]}</td>
-            <td class="font-mono font-bold text-center">${codeHTML}</td>
-            <td class="text-gray-700 font-medium leading-tight text-center sm:text-left">${row['Customer Name'] || '-'}</td>
-            <td class="text-center">${accountDisplay}</td>
-            <td class="text-gray-500 leading-tight text-center">${row['CITY'] || '-'}</td>
+            <td class="font-semibold text-gray-800 text-center py-0.5 sm:py-1 text-[9px] sm:text-[11px]">${row[selectedDay]}</td>
+            <td class="font-mono font-bold text-center py-0.5 sm:py-1 text-[9px] sm:text-[11px]">${codeHTML}</td>
+            <td class="text-gray-700 font-medium leading-tight text-center sm:text-left py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${row['Customer Name'] || '-'}</td>
+            <td class="text-center py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${accountDisplay}</td>
+            <td class="text-gray-500 leading-tight text-center py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${row['CITY'] || '-'}</td>
         </tr>`;
     });
 }
@@ -255,26 +256,26 @@ window.openCustomerModal = function(code) {
     modalContent.innerHTML = `
         <div class="flex flex-col space-y-2 text-left px-2 sm:px-4 border-b border-gray-100 pb-3">
             <div class="flex flex-col">
-                <span class="text-gray-500 font-bold text-[10px] sm:text-xs uppercase tracking-wide">Customer Name</span>
-                <span class="font-semibold text-gray-800 text-xs sm:text-sm break-words mt-0.5">${rowData['Customer Name'] || '-'}</span>
+                <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Customer Name</span>
+                <span class="font-semibold text-gray-800 text-[10px] sm:text-sm break-words mt-0.5">${rowData['Customer Name'] || '-'}</span>
             </div>
             <div class="flex flex-col">
-                <span class="text-gray-500 font-bold text-[10px] sm:text-xs uppercase tracking-wide">Account</span>
-                <span class="font-semibold text-gray-700 text-xs sm:text-sm mt-0.5">${rowData['Account'] || '-'}</span>
+                <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Account</span>
+                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${rowData['Account'] || '-'}</span>
             </div>
             <div class="flex flex-col">
-                <span class="text-gray-500 font-bold text-[10px] sm:text-xs uppercase tracking-wide">Code</span>
-                <span class="font-mono font-bold text-blue-600 text-xs sm:text-sm mt-0.5">${rowData['CustomerCode'] || '-'}</span>
+                <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Code</span>
+                <span class="font-mono font-bold text-blue-600 text-[10px] sm:text-sm mt-0.5">${rowData['CustomerCode'] || '-'}</span>
             </div>
             <div class="flex flex-col">
-                <span class="text-gray-500 font-bold text-[10px] sm:text-xs uppercase tracking-wide">Position Code</span>
-                <span class="font-semibold text-gray-700 text-xs sm:text-sm mt-0.5">${rowData['PositionCode'] || '-'}</span>
+                <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Position Code</span>
+                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${rowData['PositionCode'] || '-'}</span>
             </div>
         </div>
 
         <div class="flex flex-col pt-3 text-center px-2 sm:px-4">
-            <span class="text-gray-500 font-bold text-[10px] sm:text-xs mb-1.5">Schedule / Frequency:</span>
-            <span class="bg-blue-50 text-blue-800 p-1.5 rounded-md font-bold text-[10px] sm:text-xs leading-relaxed border border-blue-100">${scheduleList.length > 0 ? scheduleList.join(', ') : 'None'}</span>
+            <span class="text-gray-500 font-bold text-[9px] sm:text-xs mb-1.5">Schedule / Frequency:</span>
+            <span class="bg-blue-50 text-blue-800 p-1.5 rounded-md font-bold text-[9px] sm:text-xs leading-relaxed border border-blue-100">${scheduleList.length > 0 ? scheduleList.join(', ') : 'None'}</span>
         </div>
     `;
     customerModal.classList.remove('hidden');
@@ -377,22 +378,22 @@ function generateDynamicPivot(rawData) {
     weeksData.forEach(w => {
         weeklyHTML += `
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
-            <table class="auto-table text-center w-full">
+            <table class="auto-table text-center w-full text-[8px] sm:text-xs">
                 <thead>
                     <tr>
-                        <th colspan="3" class="${w.titleBg} text-white font-bold py-1.5 sm:py-2 text-center pl-3 sm:pl-4">Week ${w.id}</th>
+                        <th colspan="3" class="${w.titleBg} text-white font-bold py-1.5 sm:py-2 text-left pl-3 sm:pl-4">Week ${w.id}</th>
                         <th colspan="4" class="${w.titleBg} text-right pr-2 sm:pr-3">
-                            <button onclick="openWeeklyModal(${w.id})" class="bg-white ${w.textBtn} px-2 py-1 text-[10px] sm:text-xs rounded shadow-sm hover:bg-gray-50 transition font-bold whitespace-nowrap">More Details</button>
+                            <button onclick="openWeeklyModal(${w.id})" class="bg-white ${w.textBtn} px-2 py-1 text-[8px] sm:text-[10px] rounded shadow-sm hover:bg-gray-50 transition font-bold whitespace-nowrap">More Details</button>
                         </th>
                     </tr>
                     <tr class="${w.headBg} text-gray-700 border-b border-gray-300">
-                        <th class="w-auto text-center font-bold px-2">Position</th>
-                        <th class="w-[12%] sm:w-[10%] text-center font-bold">Mon</th>
-                        <th class="w-[12%] sm:w-[10%] text-center font-bold">Tue</th>
-                        <th class="w-[12%] sm:w-[10%] text-center font-bold">Wed</th>
-                        <th class="w-[12%] sm:w-[10%] text-center font-bold">Thu</th>
-                        <th class="w-[12%] sm:w-[10%] text-center font-bold">Fri</th>
-                        <th class="w-[15%] sm:w-[12%] text-center font-bold px-1">Avg</th>
+                        <th class="w-auto text-center font-bold px-1.5 py-0.5 sm:py-1">Position</th>
+                        <th class="w-[12%] sm:w-[10%] text-center font-bold py-0.5 sm:py-1">Mon</th>
+                        <th class="w-[12%] sm:w-[10%] text-center font-bold py-0.5 sm:py-1">Tue</th>
+                        <th class="w-[12%] sm:w-[10%] text-center font-bold py-0.5 sm:py-1">Wed</th>
+                        <th class="w-[12%] sm:w-[10%] text-center font-bold py-0.5 sm:py-1">Thu</th>
+                        <th class="w-[12%] sm:w-[10%] text-center font-bold py-0.5 sm:py-1">Fri</th>
+                        <th class="w-[15%] sm:w-[12%] text-center font-bold px-1 py-0.5 sm:py-1">Avg</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">`;
@@ -405,9 +406,9 @@ function generateDynamicPivot(rawData) {
 
             weeklyHTML += `
                 <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                    <td class="font-bold text-gray-700 text-left px-2">${pc}</td>
-                    ${counts.map((c) => `<td class="text-gray-600 font-semibold text-center">${c > 0 ? c : '-'}</td>`).join('')}
-                    <td class="font-bold text-gray-800 bg-gray-50 text-center">${avg}</td>
+                    <td class="font-bold text-gray-700 text-left px-2 py-0.5 sm:py-1">${pc}</td>
+                    ${counts.map((c) => `<td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${c > 0 ? c : '-'}</td>`).join('')}
+                    <td class="font-bold text-gray-800 bg-gray-50 text-center py-0.5 sm:py-1">${avg}</td>
                 </tr>`;
         });
         weeklyHTML += `</tbody></table></div>`;
@@ -439,20 +440,20 @@ function generateDynamicPivot(rawData) {
         let d = freqData[acc];
         freqGrandTotal[1] += d[1]; freqGrandTotal[2] += d[2]; freqGrandTotal[3] += d[3]; freqGrandTotal[4] += d[4]; freqGrandTotal.total += d.total;
         freqHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
-                     <td class="text-left font-bold text-gray-700 px-2 w-auto whitespace-nowrap">${acc}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[1] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[2] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[3] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[4] || '-'}</td>
-                     <td class="font-bold bg-blue-50 text-blue-800 text-center">${d.total || '0'}</td></tr>`;
+                     <td class="text-left font-bold text-gray-700 px-2 py-0.5 sm:py-1 w-auto whitespace-nowrap">${acc}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[1] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[2] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[3] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[4] || '-'}</td>
+                     <td class="font-bold bg-blue-50 text-blue-800 text-center py-0.5 sm:py-1">${d.total || '0'}</td></tr>`;
     });
     freqHTML += `<tr class="bg-blue-100 font-bold">
-                 <td class="text-left text-blue-900 px-2">Total</td>
-                 <td class="text-center">${freqGrandTotal[1]}</td>
-                 <td class="text-center">${freqGrandTotal[2]}</td>
-                 <td class="text-center">${freqGrandTotal[3]}</td>
-                 <td class="text-center">${freqGrandTotal[4]}</td>
-                 <td class="text-center">${freqGrandTotal.total}</td></tr>`;
+                 <td class="text-left text-blue-900 px-2 py-1">Total</td>
+                 <td class="text-center py-1">${freqGrandTotal[1]}</td>
+                 <td class="text-center py-1">${freqGrandTotal[2]}</td>
+                 <td class="text-center py-1">${freqGrandTotal[3]}</td>
+                 <td class="text-center py-1">${freqGrandTotal[4]}</td>
+                 <td class="text-center py-1">${freqGrandTotal.total}</td></tr>`;
     document.getElementById('pivot-freq-body').innerHTML = freqHTML;
 
     let visitHTML = ''; let visitGrandTotal = {1:0, 2:0, 3:0, 4:0, total:0};
@@ -460,20 +461,20 @@ function generateDynamicPivot(rawData) {
         let d = visitData[acc];
         visitGrandTotal[1] += d[1]; visitGrandTotal[2] += d[2]; visitGrandTotal[3] += d[3]; visitGrandTotal[4] += d[4]; visitGrandTotal.total += d.total;
         visitHTML += `<tr class="border-b border-gray-100 hover:bg-gray-50">
-                     <td class="text-left font-bold text-gray-700 px-2 w-auto whitespace-nowrap">${acc}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[1] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[2] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[3] || '-'}</td>
-                     <td class="text-gray-600 font-semibold text-center">${d[4] || '-'}</td>
-                     <td class="font-bold bg-gray-100 text-gray-800 text-center">${d.total || '0'}</td></tr>`;
+                     <td class="text-left font-bold text-gray-700 px-2 py-0.5 sm:py-1 w-auto whitespace-nowrap">${acc}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[1] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[2] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[3] || '-'}</td>
+                     <td class="text-gray-600 font-semibold text-center py-0.5 sm:py-1">${d[4] || '-'}</td>
+                     <td class="font-bold bg-gray-100 text-gray-800 text-center py-0.5 sm:py-1">${d.total || '0'}</td></tr>`;
     });
     visitHTML += `<tr class="bg-gray-200 font-bold">
-                 <td class="text-left text-gray-900 px-2">Overall</td>
-                 <td class="text-center">${visitGrandTotal[1]}</td>
-                 <td class="text-center">${visitGrandTotal[2]}</td>
-                 <td class="text-center">${visitGrandTotal[3]}</td>
-                 <td class="text-center">${visitGrandTotal[4]}</td>
-                 <td class="text-center">${visitGrandTotal.total}</td></tr>`;
+                 <td class="text-left text-gray-900 px-2 py-1">Overall</td>
+                 <td class="text-center py-1">${visitGrandTotal[1]}</td>
+                 <td class="text-center py-1">${visitGrandTotal[2]}</td>
+                 <td class="text-center py-1">${visitGrandTotal[3]}</td>
+                 <td class="text-center py-1">${visitGrandTotal[4]}</td>
+                 <td class="text-center py-1">${visitGrandTotal.total}</td></tr>`;
     document.getElementById('pivot-visit-body').innerHTML = visitHTML;
 }
 

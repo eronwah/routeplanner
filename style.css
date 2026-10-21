@@ -11,9 +11,15 @@ body, html { overflow-x: hidden; }
     .auto-table th, .auto-table td { padding: 0.3rem 0.4rem; font-size: 0.7rem; }
 }
 
-/* FIX: Tinanggal ang display property para mapalitan ng Responsive Class sa JS */
-.account-logo { max-height: 1.25rem; width: auto; max-width: 100%; object-fit: contain; }
-@media (min-width: 640px) { .account-logo { max-height: 1.5rem; } }
+/* FIX: Uniform at siksik na account logos para sa mobile */
+.account-logo { 
+    height: 14px !important; 
+    max-width: 55px !important; 
+    width: auto !important; 
+    object-fit: contain !important; 
+    vertical-align: middle !important; 
+    display: inline-block !important;
+}
 
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }

@@ -13,7 +13,7 @@ const cloudIndicator = document.getElementById('cloudStatusIndicator');
 const masterlistTableBody = document.getElementById('masterlistTableBody');
 const btnSaveCloud = document.getElementById('btnSaveCloud');
 
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     fetchMasterlist();
     populateClearColumnOptions();
 });
@@ -157,31 +157,32 @@ function renderMasterlist() {
         let tr = `<tr id="editing_tr_${rowId}" data-id="${rowId}" class="${trClass}">`;
         
         if(isEditing) {
-            tr += `<td class="p-2 text-center sticky left-0 z-10 w-[70px] bg-blue-50 border-r border-blue-200 align-middle">
-                <div class="w-[70px] mx-auto text-center">
-                    <span class="bg-blue-200 text-blue-800 font-bold text-[10px] px-2 py-1 rounded-md animate-pulse whitespace-nowrap">Editing</span>
+            tr += `<td class="p-0.5 sm:p-2 text-center sticky left-0 z-10 w-[60px] bg-blue-50 border-r border-blue-200 align-middle">
+                <div class="w-full mx-auto text-center">
+                    <span class="bg-blue-200 text-blue-800 font-bold text-[8px] sm:text-[10px] px-1.5 py-0.5 rounded-md animate-pulse whitespace-nowrap">Editing</span>
                 </div>
             </td>`;
         } else {
-            tr += `<td class="p-2 text-center sticky left-0 z-10 w-[70px] ${isModifiedLocally ? 'bg-yellow-50' : 'bg-white'} border-r border-gray-100 align-middle">
-                <div class="w-[70px] mx-auto flex justify-center">
-                    <button onclick="startInlineEdit('${rowId}')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1 rounded font-bold text-[10px] transition shadow-sm w-full">✏️ Edit</button>
+            tr += `<td class="p-0.5 sm:p-2 text-center sticky left-0 z-10 w-[60px] ${isModifiedLocally ? 'bg-yellow-50' : 'bg-white'} border-r border-gray-100 align-middle">
+                <div class="w-full mx-auto flex justify-center">
+                    <button onclick="startInlineEdit('${rowId}')" class="text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded font-bold text-[8px] sm:text-[10px] transition shadow-sm w-full">✏️ Edit</button>
                 </div>
             </td>`;
         }
 
-        tr += `<td class="p-2 border-r border-gray-100 align-middle bg-transparent"><div class="w-[40px] mx-auto text-center text-gray-400 font-bold text-[10px] sm:text-xs">${rowIndex++}</div></td>`;
-        tr += `<td class="p-2 border-r border-gray-100 align-middle bg-transparent"><div class="w-[60px] mx-auto text-center font-mono font-bold text-blue-600 text-[10px] sm:text-xs whitespace-nowrap">${row.CustomerCode || '-'}</div></td>`;
+        // FIX: Pinaliit ang font size at padding sa lahat
+        tr += `<td class="p-0.5 sm:p-1 border-r border-gray-100 align-middle bg-transparent"><div class="w-[30px] mx-auto text-center text-gray-400 font-bold text-[8px] sm:text-[10px]">${rowIndex++}</div></td>`;
+        tr += `<td class="p-0.5 sm:p-1 border-r border-gray-100 align-middle bg-transparent"><div class="w-full mx-auto text-center font-mono font-bold text-blue-600 text-[8px] sm:text-[10px] whitespace-nowrap">${row.CustomerCode || '-'}</div></td>`;
 
         tr += `
-            <td class="p-2 border-r border-gray-100 bg-transparent align-middle whitespace-nowrap">
-                <div class="font-bold text-gray-800 text-[10px] sm:text-xs customer-name-col" title="${row['Customer Name'] || '-'}">${row['Customer Name'] || '-'}</div>
+            <td class="p-0.5 sm:p-1 border-r border-gray-100 bg-transparent align-middle whitespace-nowrap">
+                <div class="font-bold text-gray-800 text-[8px] sm:text-[10px] customer-name-col" title="${row['Customer Name'] || '-'}">${row['Customer Name'] || '-'}</div>
             </td>
         `;
 
         const accDisplay = window.getAccountLogo(row['Account']);
-        tr += `<td class="p-2 border-r border-gray-100 align-middle bg-transparent text-center">
-                <div class="font-semibold text-[10px] sm:text-xs whitespace-nowrap">${accDisplay}</div>
+        tr += `<td class="p-0.5 sm:p-1 border-r border-gray-100 align-middle bg-transparent text-center">
+                <div class="font-semibold text-[8px] sm:text-[10px] whitespace-nowrap">${accDisplay}</div>
                </td>`;
 
         let autoFreq = window.allDays.filter(d => window.isValidStrNum(row[d])).length;
@@ -196,11 +197,11 @@ function renderMasterlist() {
 
         if(isEditing) {
             tr += `<td id="inline_freq_display_${rowId}" class="fixed-40 border-r border-gray-100 bg-blue-50 text-gray-400 align-middle" title="Auto computed based on schedules">
-                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center font-bold text-[10px] sm:text-xs">${autoFreq > 0 ? autoFreq : '-'}</div>
+                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center font-bold text-[9px] sm:text-[10px]">${autoFreq > 0 ? autoFreq : '-'}</div>
                    </td>`;
         } else {
             tr += `<td class="fixed-40 border-r border-gray-100 align-middle">
-                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center font-bold text-[10px] sm:text-xs ${freqStyle}">${freqDisplay}</div>
+                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center font-bold text-[9px] sm:text-[10px] ${freqStyle}">${freqDisplay}</div>
                    </td>`;
         }
 
@@ -228,7 +229,7 @@ function renderMasterlist() {
                 const val = row[d];
                 const hasVal = window.isValidStrNum(val);
                 tr += `<td class="fixed-40 border-r border-gray-100 align-middle bg-transparent ${hideClass}">
-                        <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center text-[10px] sm:text-xs ${hasVal ? 'font-bold text-blue-700' : 'text-gray-300'}">${hasVal ? val : '-'}</div>
+                        <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center text-[9px] sm:text-[11px] ${hasVal ? 'font-bold text-blue-700' : 'text-gray-300'}">${hasVal ? val : '-'}</div>
                        </td>`;
             }
         });
