@@ -7,10 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- BAGO: html2canvas library para sa Download Image feature -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="stylesheet" href="styles.css">
     <style>
         /* CSS pampatanggal ng Up at Down arrows sa mga number inputs */
@@ -35,7 +32,8 @@
                 <button class="py-2 px-3 sm:px-5 text-blue-700 border-b-2 border-blue-700 bg-blue-50 font-bold rounded-t-md transition text-xs sm:text-sm whitespace-nowrap" id="tab-lookup">Lookup Route</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-pivot">Dynamic Pivot</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-graphs">Graphs</button>
-                <button class="py-2 px-3 sm:px-5 text-green-600 border-b-2 border-transparent font-bold hover:text-green-700 transition text-xs sm:text-sm whitespace-nowrap" id="tab-masterlist">Route Planner (Cloud)</button>
+                <!-- BAGO: Idinagdag ang "hidden lg:block" para hindi lumabas sa mobile screens -->
+                <button class="hidden lg:block py-2 px-3 sm:px-5 text-green-600 border-b-2 border-transparent font-bold hover:text-green-700 transition text-xs sm:text-sm whitespace-nowrap" id="tab-masterlist">Route Planner (Cloud)</button>
             </div>
 
             <!-- ================= LOOKUP ROUTE SECTION (DEFAULT VIEW) ================= -->
@@ -63,7 +61,6 @@
                             </select>
                         </div>
                         
-                        <!-- BAGO: Download Image Button sa right upper corner -->
                         <div class="flex items-center">
                             <button id="btnDownloadImage" onclick="downloadLookupImage()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] sm:text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5 w-full sm:w-auto">
                                 📸 Download Image
@@ -71,7 +68,6 @@
                         </div>
                     </div>
                     
-                    <!-- BAGO: Wrapper para sa Capture Area -->
                     <div id="lookupCaptureArea" class="bg-white p-2 rounded-lg w-full">
                         <div id="totalCount" class="mb-4 w-full flex justify-center hidden"></div>
                         
@@ -171,9 +167,518 @@
                 </div>
             </div>
 
-            <!-- ROUTE PLANNER MASTERLIST CONTENT OMITTED HERE FOR BREVITY (Keep your original #section-masterlist here) -->
+            <!-- ================= ROUTE PLANNER MASTERLIST ================= -->
+            <div id="section-masterlist" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full hidden">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 border-b border-gray-200 pb-3 gap-3">
+                    <h2 class="text-sm sm:text-lg font-bold text-gray-700 flex flex-wrap items-center gap-2">
+                        Route Planner (Cloud)
+                        <span id="cloudStatusIndicator" class="text-[9px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">Connecting...</span>
+                        
+                        <button id="btnResync" onclick="resyncData()" class="flex items-center gap-1 text-[9px] sm:text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition shadow-sm font-semibold">
+                            🔄 Resync
+                        </button>
+                        <span id="lastUpdateTime" class="text-[9px] sm:text-[10px] text-gray-400 font-normal ml-1"></span>
+                    </h2>
+                    
+                    <div class="hidden lg:flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
+                        <button onclick="startEditAll()" id="btnEditAll" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            📝 Edit All
+                        </button>
+                        <button onclick="openAddRouteModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ➕ Add Route
+                        </button>
+                        <button onclick="openClearColumnModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            🧹 Clear Column
+                        </button>
+                        <button onclick="clearAllSchedules()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            🗑️ Clear All
+                        </button>
+                        <button id="btnSaveCloud" onclick="saveToCloud()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ☁️ Save to Cloud
+                        </button>
+                        <button onclick="downloadMasterlistExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ⬇️ Download Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="block lg:hidden bg-red-50 border border-red-200 p-4 sm:p-6 rounded-lg text-center my-4 shadow-sm mx-auto max-w-md">
+                    <p class="text-red-800 font-bold text-[11px] sm:text-base mb-1">🖥️ Desktop Access Only</p>
+                    <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-4 mb-4 w-full items-stretch">
+                    <!-- Editing Insights Panel -->
+                    <div id="editingInsightsPanel" class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 shadow-sm w-full lg:w-[45%] text-left transition-all flex flex-col">
+                        <div class="flex justify-between items-center mb-3 border-b border-blue-200 pb-2">
+                            <h3 class="font-bold text-blue-800 text-xs sm:text-sm flex items-center gap-2">
+                                <span>📊</span> Editing Insights
+                            </h3>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 items-start flex-1">
+                            <div class="text-[10px] sm:text-xs text-gray-700 flex flex-col gap-1 w-full sm:w-1/2">
+                                <div class="flex"><span class="font-bold w-20">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
+                                <div class="flex"><span class="font-bold w-20">Customer:</span> <span id="insightCustomer">-</span></div>
+                                <div class="flex"><span class="font-bold w-20">Account:</span> <span id="insightAccount">-</span></div>
+                                <div class="flex"><span class="font-bold w-20">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
+                            </div>
+                            <div class="w-full sm:w-1/2 flex flex-col items-center">
+                                <p id="insightMiniTableTitle" class="text-[10px] sm:text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide w-full text-center">Insights Table</p>
+                                <table class="w-full text-[9px] sm:text-[10px] text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
+                                    <thead class="bg-gray-100 border-b border-gray-300">
+                                        <tr>
+                                            <th class="p-1 px-2 font-bold text-gray-700 w-1/2 border-r border-gray-300">Category</th>
+                                            <th class="p-1 px-2 font-bold text-gray-700 w-1/2">Sequence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="insightMiniTableBody">
+                                        <tr><td colspan="2" class="p-2 text-center text-gray-400 italic">No schedule selected</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pivot Insights Panel -->
+                    <div id="pivotInsightsPanel" class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 shadow-sm w-full lg:w-[55%] flex flex-col transition-all">
+                        <div class="flex justify-between items-center mb-3 border-b border-blue-200 pb-2">
+                            <h3 class="font-bold text-blue-800 text-xs sm:text-sm flex items-center gap-2">
+                                <span>📈</span> Pivot Insights
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 h-full">
+                            <!-- Week 1 -->
+                            <div class="border border-gray-200 rounded overflow-hidden bg-white shadow-sm flex flex-col">
+                                <div class="bg-emerald-50 text-emerald-800 text-[9px] font-bold px-2 py-0.5 border-b border-gray-200 text-center uppercase tracking-wide">Week 1</div>
+                                <table class="w-full text-center text-[9px] h-full">
+                                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                                        <tr><th class="py-1">M</th><th class="py-1">T</th><th class="py-1">W</th><th class="py-1">Th</th><th class="py-1">F</th><th class="font-bold py-1 bg-gray-100">Avg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-1" id="pivot_w1_mon">-</td><td class="py-1" id="pivot_w1_tue">-</td><td class="py-1" id="pivot_w1_wed">-</td><td class="py-1" id="pivot_w1_thu">-</td><td class="py-1" id="pivot_w1_fri">-</td><td class="font-bold text-emerald-600 bg-emerald-50 py-1" id="pivot_w1_avg">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Week 2 -->
+                            <div class="border border-gray-200 rounded overflow-hidden bg-white shadow-sm flex flex-col">
+                                <div class="bg-rose-50 text-rose-800 text-[9px] font-bold px-2 py-0.5 border-b border-gray-200 text-center uppercase tracking-wide">Week 2</div>
+                                <table class="w-full text-center text-[9px] h-full">
+                                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                                        <tr><th class="py-1">M</th><th class="py-1">T</th><th class="py-1">W</th><th class="py-1">Th</th><th class="py-1">F</th><th class="font-bold py-1 bg-gray-100">Avg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-1" id="pivot_w2_mon">-</td><td class="py-1" id="pivot_w2_tue">-</td><td class="py-1" id="pivot_w2_wed">-</td><td class="py-1" id="pivot_w2_thu">-</td><td class="py-1" id="pivot_w2_fri">-</td><td class="font-bold text-rose-600 bg-rose-50 py-1" id="pivot_w2_avg">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Week 3 -->
+                            <div class="border border-gray-200 rounded overflow-hidden bg-white shadow-sm flex flex-col">
+                                <div class="bg-amber-50 text-amber-800 text-[9px] font-bold px-2 py-0.5 border-b border-gray-200 text-center uppercase tracking-wide">Week 3</div>
+                                <table class="w-full text-center text-[9px] h-full">
+                                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                                        <tr><th class="py-1">M</th><th class="py-1">T</th><th class="py-1">W</th><th class="py-1">Th</th><th class="py-1">F</th><th class="font-bold py-1 bg-gray-100">Avg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-1" id="pivot_w3_mon">-</td><td class="py-1" id="pivot_w3_tue">-</td><td class="py-1" id="pivot_w3_wed">-</td><td class="py-1" id="pivot_w3_thu">-</td><td class="py-1" id="pivot_w3_fri">-</td><td class="font-bold text-amber-600 bg-amber-50 py-1" id="pivot_w3_avg">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Week 4 -->
+                            <div class="border border-gray-200 rounded overflow-hidden bg-white shadow-sm flex flex-col">
+                                <div class="bg-cyan-50 text-cyan-800 text-[9px] font-bold px-2 py-0.5 border-b border-gray-200 text-center uppercase tracking-wide">Week 4</div>
+                                <table class="w-full text-center text-[9px] h-full">
+                                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                                        <tr><th class="py-1">M</th><th class="py-1">T</th><th class="py-1">W</th><th class="py-1">Th</th><th class="py-1">F</th><th class="font-bold py-1 bg-gray-100">Avg</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-1" id="pivot_w4_mon">-</td><td class="py-1" id="pivot_w4_tue">-</td><td class="py-1" id="pivot_w4_wed">-</td><td class="py-1" id="pivot_w4_thu">-</td><td class="py-1" id="pivot_w4_fri">-</td><td class="font-bold text-cyan-600 bg-cyan-50 py-1" id="pivot_w4_avg">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex justify-end mb-2 w-full pr-1">
+                    <button onclick="openSequenceInsightsModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-bold shadow-sm transition flex items-center gap-1">
+                        📋 Sequence Insights
+                    </button>
+                </div>
+
+                <div class="hidden lg:block w-full mx-auto border border-gray-200 rounded-md overflow-x-auto max-h-[75vh] overflow-y-auto relative bg-white shadow-sm pb-16">
+                    <table class="w-full bg-white text-left text-xs whitespace-nowrap auto-table min-w-[1000px]">
+                        <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+                            <tr class="text-[9px] sm:text-[10px]">
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[75px] bg-gray-100 sticky left-0 z-30">Action</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[30px] bg-gray-100">Line</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center bg-gray-100">Code</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 customer-name-col">Customer Name</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 text-center">Account</th>
+                                <th rowspan="2" class="fixed-40 border-r border-gray-200 bg-gray-100 align-middle text-center" title="Auto-computed Frequency">
+                                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Freq</div>
+                                </th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-emerald-50 text-emerald-800">Week 1</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-rose-50 text-rose-800">Week 2</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-amber-50 text-amber-800">Week 3</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-cyan-50 text-cyan-800">Week 4</th>
+                            </tr>
+                            <tr class="bg-gray-50 border-b border-gray-300 text-gray-500 text-[8px] sm:text-[9px]">
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterlistTableBody">
+                            <tr><td colspan="34" class="py-8 text-center text-blue-600 font-bold"><span class="loader"></span> Loading cloud database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FLOATING EDIT BAR PARA SA SINGLE ROW -->
+            <div id="floatingEditBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white border border-gray-200 px-5 py-3 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-50 flex items-center justify-between gap-6 min-w-[350px]">
+                <div class="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <span class="animate-pulse h-2.5 w-2.5 bg-blue-500 rounded-full inline-block shadow-sm"></span> 
+                    <span id="floatingEditTitle">Editing Line -</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="cancelInlineEdit()" class="bg-red-500 text-white hover:bg-red-600 px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Cancel</button>
+                    <button onclick="saveCurrentEdit()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Save Changes</button>
+                </div>
+            </div>
+
+            <!-- FLOATING EDIT BAR PARA SA EDIT ALL -->
+            <div id="floatingEditAllBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white border border-indigo-200 px-5 py-3 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-50 flex items-center justify-between gap-6 min-w-[350px]">
+                <div class="flex items-center gap-2 text-sm font-bold text-indigo-900">
+                    <span class="animate-pulse h-2.5 w-2.5 bg-indigo-500 rounded-full inline-block shadow-sm"></span> 
+                    <span>Editing All Rows</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="cancelEditAll()" class="bg-red-500 text-white hover:bg-red-600 px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Cancel</button>
+                    <button onclick="reviewEditAll()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Review Changes</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <!-- ================= MODALS ================= -->
+
+    <!-- EDIT ALL SUMMARY MODAL -->
+    <div id="editAllSummaryModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[90] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 relative max-h-[90vh] flex flex-col">
+            <h3 class="text-lg font-bold text-gray-800 mb-2 border-b border-gray-200 pb-2">Review Changes</h3>
+            <p class="text-sm text-gray-600 mb-4">Please review your edits before saving:</p>
+            <div class="overflow-y-auto flex-1 mb-4 border border-gray-200 rounded-lg">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-gray-100 sticky top-0 border-b border-gray-200 shadow-sm z-10">
+                        <tr>
+                            <th class="p-2 px-3 font-bold text-gray-700 w-1/2 border-r border-gray-200">Customer Name</th>
+                            <th class="p-2 px-3 font-bold text-gray-700 w-1/4 text-center border-r border-gray-200">Frequency</th>
+                            <th class="p-2 px-3 font-bold text-gray-700 w-1/4">Day/Week Updates</th>
+                        </tr>
+                    </thead>
+                    <tbody id="editAllSummaryBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end gap-3 mt-auto pt-3 border-t border-gray-100">
+                <button onclick="closeEditAllSummary()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition">Back to Edit</button>
+                <button onclick="saveEditAll()" class="bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-lg text-sm font-bold transition shadow-sm">Confirm & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT & MOVE CONFIRM MODAL -->
+    <div id="editConfirmModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[90] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-blue-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Save Changes?</h3>
+            <p class="text-sm text-gray-600 mb-6">Would you like to move <b id="editConfirmCustomerName" class="text-gray-900"></b> to line <b id="editConfirmLine" class="text-blue-600"></b> and save changes?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeEditConfirmModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="proceedSaveCurrentEdit()" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRE-SAVE ERROR MODAL -->
+    <div id="preSaveErrorModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[90] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative max-h-[90vh] flex flex-col">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2 text-center">Cannot Save to Cloud</h3>
+            <p class="text-sm text-gray-600 mb-4 text-center">Please fix the following errors before saving:</p>
+            <div id="preSaveErrorContent" class="overflow-y-auto flex-1 text-sm text-gray-700 bg-red-50 p-3 rounded-lg border border-red-200 mb-4 space-y-3">
+            </div>
+            <div class="flex justify-center mt-auto">
+                <button onclick="closePreSaveErrorModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, I will fix it</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEQUENCE INSIGHTS MODAL -->
+    <div id="sequenceInsightsModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 relative flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h3 class="text-lg font-bold text-gray-800">Sequence Insights</h3>
+                <button onclick="closeSequenceInsightsModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1">Select Day/Week</label>
+                <select id="seqInsightDaySelector" onchange="renderSequenceInsightsTable()" class="border border-gray-300 rounded-lg p-2 w-full text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2 mb-2 justify-start">
+                <button id="btnSeqEdit" onclick="toggleSeqEdit()" class="hidden bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-200 transition">✏️ Edit Sequence</button>
+                <button id="btnSeqAdd" onclick="openSeqAddModal()" class="hidden bg-purple-100 text-purple-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-purple-200 transition">➕ Add Account</button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 border border-gray-200 rounded-lg">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-gray-100 sticky top-0 border-b border-gray-200 shadow-sm z-10">
+                        <tr>
+                            <th class="p-2 px-3 font-bold text-gray-700 w-3/4 border-r border-gray-200">Customer Name</th>
+                            <th class="p-2 px-3 font-bold text-gray-700 w-1/4 text-center">Sequence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seqInsightTableBody">
+                        <tr><td colspan="2" class="p-4 text-center text-gray-500 italic">Please select a day.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 flex justify-between items-center pt-3 border-t border-gray-100">
+                <button onclick="closeSequenceInsightsModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-5 py-2 rounded-lg text-sm font-bold transition">Close</button>
+                <button id="btnSeqSave" onclick="saveSequenceInsights()" class="hidden bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-lg text-sm font-bold transition shadow-sm">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEQUENCE ADD MODAL -->
+    <div id="seqAddModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-4 relative flex flex-col">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-gray-800">Add Account to Sequence</h3>
+                <button onclick="closeSeqAddModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <input type="text" id="seqSearchInput" onkeyup="searchSeqAccounts()" placeholder="Search Customer Name or Code..." class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none mb-2">
+            <div id="seqSearchResults" class="max-h-48 overflow-y-auto border border-gray-100 rounded">
+            </div>
+        </div>
+    </div>
+
+    <!-- SEQUENCE CONFIRM ADD MODAL -->
+    <div id="seqConfirmAddModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[90] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-purple-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Save Account?</h3>
+            <p class="text-sm text-gray-600 mb-6">Do you want to add this account? <br><b class="text-red-500">Don't forget to assign a sequence number!</b></p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeSeqConfirmAddModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="confirmAddSeqAccount()" class="bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEQUENCE VALIDATION EMPTY MODAL -->
+    <div id="seqValidationModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Missing Sequence</h3>
+            <p class="text-sm text-gray-600 mb-6">Please input a sequence number for all accounts in the list.</p>
+            <button onclick="closeSeqValidationModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, Got it</button>
+        </div>
+    </div>
+
+    <!-- SEQUENCE LOCAL SUCCESS MODAL -->
+    <div id="seqLocalSuccessModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-green-500 mb-3 flex justify-center">
+                <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Success!</h3>
+            <p class="text-sm text-gray-600 mb-6">Saved locally. These changes won't be final until you click the <b>Save to Cloud</b> button on the main table.</p>
+            <button onclick="closeSeqLocalSuccessModal()" class="bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-lg text-sm font-bold transition w-full shadow-sm">Okay</button>
+        </div>
+    </div>
+
+    <!-- IBANG EXISTING MODALS... -->
+    <div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative transform transition-transform scale-100">
+            <div class="text-green-500 mb-4 flex justify-center">
+                <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Success!</h3>
+            <p id="successModalMessage" class="text-sm text-gray-600 mb-6">New route successfully added to the cloud database.</p>
+            <button onclick="closeSuccessModal()" class="bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-lg text-sm font-bold transition w-full shadow-sm">Okay</button>
+        </div>
+    </div>
+
+    <div id="addRouteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h3 class="text-lg font-bold text-gray-800">Add New Route</h3>
+                <button onclick="closeAddRouteModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div class="hidden">
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Primary Key</label>
+                    <input type="text" id="newPrimaryKey" value="Auto Generated" disabled class="w-full border border-gray-300 bg-gray-100 rounded-lg p-2 text-xs text-gray-500">
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Customer Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCustomerName" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Account <span class="text-red-500">*</span></label>
+                    <input type="text" id="newAccount" oninput="this.value = this.value.toUpperCase()" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">City <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCity" oninput="this.value = this.value.toUpperCase()" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Customer Code <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCustomerCode" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Position Code</label>
+                        <input type="text" id="newPositionCode" value="IC003CAB" readonly class="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 text-xs text-gray-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Sales Office</label>
+                        <input type="text" id="newSalesOffice" value="CABANATUAN" readonly class="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 text-xs text-gray-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 justify-end mt-5">
+                <button onclick="closeAddRouteModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold w-full sm:w-auto transition">Cancel</button>
+                <button onclick="proceedToAddRouteConfirm()" class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg text-sm font-bold w-full sm:w-auto transition shadow-sm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmAddRouteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-blue-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Save New Route?</h3>
+            <p class="text-sm text-gray-600 mb-6">Are you sure you want to add this new data to the cloud database? This action will sync immediately.</p>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeConfirmAddRoute()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button id="btnFinalSaveRoute" onclick="saveNewRoute()" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="duplicateErrorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-orange-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Duplicate Found</h3>
+            <p class="text-sm text-gray-600 mb-6">A route with this Customer Code or Customer Name already exists.</p>
+            <button onclick="closeDuplicateErrorModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, Got it</button>
+        </div>
+    </div>
+
+    <div id="validationErrorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Missing Information</h3>
+            <p class="text-sm text-gray-600 mb-6">Please fill in all required fields to continue.</p>
+            <button onclick="closeValidationErrorModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, Got it</button>
+        </div>
+    </div>
+
+    <div id="clearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-orange-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Clear Specific Column</h3>
+            <p class="text-sm text-gray-600 mb-4">Which column do you want to delete/clear?</p>
+            <div class="text-left mb-6 relative">
+                <input list="dayColumnOptions" id="clearColumnInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type or select a day...">
+                <datalist id="dayColumnOptions"></datalist>
+            </div>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeClearColumnModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="confirmClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Clear Column</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmClearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-orange-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Are you sure?</h3>
+            <p class="text-sm text-gray-600 mb-6">You are about to clear all schedules for <span id="confirmColumnNameText" class="font-bold text-gray-900"></span>. You still need to click <b>Save to Cloud</b> after this.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="cancelConfirmClearColumn()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="proceedClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="clearAllModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Clear All Schedules?</h3>
+            <p class="text-sm text-gray-600 mb-6">This will set all sequence numbers to blank and Frequency to 0. You still need to click <b>Save to Cloud</b> to permanently apply changes.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeClearAllModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="confirmClearAll()" class="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="freqWarningModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Limit Exceeded</h3>
+            <p class="text-sm text-gray-600 mb-6">Unable to save because the frequency for this account will exceed 4.</p>
+            <button onclick="closeFreqModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, Got it</button>
+        </div>
+    </div>
+
+    <!-- OTHER MODALS -->
     <div id="customerModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-4 sm:p-5 relative"><button id="closeModalBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2 text-center">Customer Details</h3><div id="modalContent" class="w-full"></div><div class="mt-4 text-center"><button id="closeModalBtnBottom" class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full">Close</button></div></div></div>
     <div id="weeklyModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative flex flex-col max-h-[85vh]"><div id="weeklyModalHeader" class="rounded-t-xl px-4 py-3 sm:px-5 sm:py-4 flex justify-between items-center transition-colors"><h3 id="weeklyModalTitle" class="text-lg font-bold text-white">Week Details</h3><button id="closeWeeklyModalBtn" class="text-white hover:text-gray-200 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div id="weeklyModalContent" class="p-4 sm:p-5 overflow-y-auto space-y-3 bg-gray-50 flex-1"></div><div class="p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeWeeklyModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>
     <div id="graphModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-md w-full relative flex flex-col max-h-[85vh]"><div class="px-4 py-3 sm:px-4 sm:py-4 flex justify-between items-center bg-gray-50 border-b border-gray-200 rounded-t-xl"><h3 id="graphModalTitle" class="text-[13px] sm:text-sm font-bold text-gray-800 uppercase tracking-wide"></h3><button id="closeGraphModalBtn" class="text-gray-400 hover:text-gray-600 focus:outline-none ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div class="p-4 sm:p-5 overflow-y-auto flex-1"><div class="grid grid-cols-[auto_1fr] gap-x-4 text-xs sm:text-sm min-w-full" id="graphModalContent"></div></div><div class="p-3 sm:p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeGraphModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>

@@ -94,6 +94,7 @@ window.enableScroll = () => { document.body.classList.remove('overflow-hidden');
 window.checkBodyScroll = () => { if (customerModal.classList.contains('hidden') && weeklyModal.classList.contains('hidden') && graphModal.classList.contains('hidden')) { window.enableScroll(); } };
 
 // ================= TAB NAVIGATION =================
+// Inayos para mag-render nang maayos ang charts at tables sa mobile browsers kapag nag-switch tab
 function switchTab(activeTabStr) {
     const activeTabClasses = ['border-blue-700', 'text-blue-700', 'bg-blue-50', 'font-bold', 'rounded-t-md'];
     const inactiveTabClasses = ['text-gray-500', 'border-transparent', 'font-semibold', 'hover:text-blue-600'];
@@ -108,10 +109,14 @@ function switchTab(activeTabStr) {
         tabLookup.classList.remove(...inactiveTabClasses); tabLookup.classList.add(...activeTabClasses); secLookup.classList.remove('hidden');
     } else if (activeTabStr === 'pivot') {
         tabPivot.classList.remove(...inactiveTabClasses); tabPivot.classList.add(...activeTabClasses); secPivot.classList.remove('hidden');
-        if(window.globalExcelData.length > 0) generateDynamicPivot(window.globalExcelData);
+        if(window.globalExcelData.length > 0) {
+            setTimeout(() => generateDynamicPivot(window.globalExcelData), 50); // Timeout para maka-render muna sa mobile bago ipasok ang table
+        }
     } else if (activeTabStr === 'graphs') {
         tabGraphs.classList.remove(...inactiveTabClasses); tabGraphs.classList.add(...activeTabClasses); secGraphs.classList.remove('hidden');
-        if(window.globalExcelData.length > 0) renderGraphs();
+        if(window.globalExcelData.length > 0) {
+            setTimeout(() => renderGraphs(), 50); // Timeout para hindi mag-collapse sa 0 height ang canvas sa mobile
+        }
     } else if (activeTabStr === 'masterlist') {
         tabMasterlist.classList.remove(...inactiveGreenClasses); tabMasterlist.classList.add(...activeGreenClasses); secMasterlist.classList.remove('hidden');
     }
@@ -145,7 +150,7 @@ fileInput.addEventListener('change', function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             
-            // STRICT TAB NAME REQUIREMENT: Dapat IC003CAB OCTOBER - FINAL
+            // STRICT TAB NAME REQUIREMENT
             const sheetName = 'IC003CAB OCTOBER - FINAL';
             
             if(!workbook.SheetNames.includes(sheetName)) {
@@ -154,7 +159,6 @@ fileInput.addEventListener('change', function(e) {
                 return;
             }
             
-            // Diretso nang basahin ang tamang tab
             let rawParsedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
             
             // NORMALIZER
@@ -219,8 +223,8 @@ fileInput.addEventListener('change', function(e) {
                 performSearch();
             }
 
-            if(!secPivot.classList.contains('hidden')) generateDynamicPivot(window.globalExcelData);
-            if(!secGraphs.classList.contains('hidden')) renderGraphs();
+            if(!secPivot.classList.contains('hidden')) setTimeout(() => generateDynamicPivot(window.globalExcelData), 50);
+            if(!secGraphs.classList.contains('hidden')) setTimeout(() => renderGraphs(), 50);
         } catch (error) {
             console.error(error);
             uploadStatus.innerHTML = `Error reading Excel file. <br><span class="text-red-700">Make sure it's a valid Excel (.xlsx) file.</span>`;
@@ -309,6 +313,7 @@ window.downloadLookupImage = function() {
     btn.innerHTML = '⏳ Generating...';
     btn.disabled = true;
 
+    // Kunin ang filename + Date Today
     let selectedDayText = 'Schedule';
     if (daySelectEl && daySelectEl.selectedIndex > 0) {
         selectedDayText = daySelectEl.options[daySelectEl.selectedIndex].text.split(' (')[0];
@@ -323,6 +328,7 @@ window.downloadLookupImage = function() {
     const originalMaxWidth = captureArea.style.maxWidth;
     const originalOverflow = captureArea.style.overflow;
 
+    // Para hindi ma-cut sa mobile, i-wewiden natin pansamantala
     captureArea.style.width = captureArea.scrollWidth + 'px';
     captureArea.style.maxWidth = 'none';
     captureArea.style.overflow = 'visible';
@@ -336,7 +342,7 @@ window.downloadLookupImage = function() {
 
     setTimeout(() => {
         html2canvas(captureArea, { 
-            scale: 2, 
+            scale: window.devicePixelRatio > 1 ? 2 : 1, // High res for mobile
             backgroundColor: '#ffffff', 
             logging: false,
             useCORS: true
@@ -347,10 +353,45 @@ window.downloadLookupImage = function() {
             captureArea.style.overflow = originalOverflow;
             if (tableWrapper) tableWrapper.style.overflow = tableWrapperOriginalOverflow;
             
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // MOBILE / IN-APP BROWSER FALLBACK
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // Gumawa ng overlay modal kung saan ididisplay ang picture para ma-long press ng user
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-gray-900 bg-opacity-95 z-[9999] flex flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity';
+                overlay.onclick = function(e) { if(e.target === overlay) document.body.removeChild(overlay); };
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'absolute top-4 right-4 text-white font-bold bg-gray-700 hover:bg-gray-600 rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-lg';
+                closeBtn.innerHTML = '✕';
+                closeBtn.onclick = () => document.body.removeChild(overlay);
+
+                const instructionContainer = document.createElement('div');
+                instructionContainer.className = 'bg-blue-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full mb-4 shadow-lg text-center';
+                instructionContainer.innerText = '📸 Long press the image below and select "Save Image"';
+
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'overflow-auto max-h-[75vh] w-full flex justify-center bg-white rounded-lg shadow-2xl p-1';
+                
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.className = 'max-w-full h-auto object-contain block';
+
+                imgContainer.appendChild(img);
+                overlay.appendChild(closeBtn);
+                overlay.appendChild(instructionContainer);
+                overlay.appendChild(imgContainer);
+                document.body.appendChild(overlay);
+            } else {
+                // Regular download para sa Desktop
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = dataUrl;
+                link.click();
+            }
             
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -365,7 +406,7 @@ window.downloadLookupImage = function() {
             btn.innerHTML = originalText;
             btn.disabled = false;
         });
-    }, 400);
+    }, 500); 
 };
 
 window.openCustomerModal = function(code) {
