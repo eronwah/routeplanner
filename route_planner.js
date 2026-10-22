@@ -41,8 +41,29 @@ function populateClearColumnOptions() {
     datalist.innerHTML = optionsHTML;
 }
 
+// BAGO: 6-Digits Alphanumeric ALL CAPS Primary Key Generator
 window.generateUniqueId = function() {
-    return crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+// BAGO: Success Pop-up Modal Function
+window.showSuccessModal = function(msg) {
+    document.getElementById('successModalMessage').innerText = msg;
+    document.getElementById('successModal').classList.remove('hidden');
+};
+
+window.closeSuccessModal = function() {
+    document.getElementById('successModal').classList.add('hidden');
+};
+
+// BAGO: Resync Button Function
+window.resyncData = function() {
+    fetchMasterlist();
 };
 
 // ================= ADD ROUTE LOGIC =================
@@ -58,7 +79,6 @@ window.closeAddRouteModal = function() {
     document.getElementById('addRouteModal').classList.add('hidden');
 };
 
-// BAGO: Function para sa validation error modal
 window.closeValidationErrorModal = function() {
     document.getElementById('validationErrorModal').classList.add('hidden');
 };
@@ -70,7 +90,6 @@ window.proceedToAddRouteConfirm = function() {
     const code = document.getElementById('newCustomerCode').value.trim();
 
     if(!name || !account || !city || !code) {
-        // Binago: Sa halip na default browser alert, magbubukas ito ng custom modal
         document.getElementById('validationErrorModal').classList.remove('hidden');
         return;
     }
@@ -90,15 +109,19 @@ window.saveNewRoute = async function() {
     btn.disabled = true;
 
     const payload = {
-        "id": window.generateUniqueId(),
+        "Primary Key": window.generateUniqueId(),
         "Customer Name": document.getElementById('newCustomerName').value.trim().toUpperCase(),
         "Account": document.getElementById('newAccount').value.trim().toUpperCase(),
-        "CITY": document.getElementById('newCity').value.trim().toUpperCase(),
+        "City": document.getElementById('newCity').value.trim().toUpperCase(),
         "CustomerCode": document.getElementById('newCustomerCode').value.trim(),
         "PositionCode": document.getElementById('newPositionCode').value,
-        "SalesOffice": document.getElementById('newSalesOffice').value,
+        "Sales Office": document.getElementById('newSalesOffice').value,
         "Frequency": 0
     };
+
+    window.allDays.forEach(d => {
+        payload[d] = null;
+    });
 
     try {
         const response = await fetch(supabaseUrl, {
@@ -112,7 +135,11 @@ window.saveNewRoute = async function() {
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error("Failed to insert data");
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            const errorMsg = (errorData && errorData.message) ? errorData.message : "Failed to insert data";
+            throw new Error(errorMsg);
+        }
 
         const insertedData = await response.json();
         
@@ -124,10 +151,11 @@ window.saveNewRoute = async function() {
             fetchMasterlist(); 
         }
 
-        alert("New route successfully added to the cloud!");
         document.getElementById('confirmAddRouteModal').classList.add('hidden');
+        // Pinalitan ang alert() ng custom modal
+        showSuccessModal("New route successfully added to the cloud database.");
     } catch(e) {
-        alert("Error adding new route: " + e.message);
+        alert("Error adding new route:\n\n" + e.message);
     } finally {
         btn.innerHTML = `Yes, Save`;
         btn.disabled = false;
@@ -195,7 +223,7 @@ window.proceedClearColumn = function() {
             });
             row.Frequency = count;
             
-            modifiedRows.add(row.id || row.CustomerCode);
+            modifiedRows.add(row['Primary Key'] || row.CustomerCode);
         }
     });
     
@@ -231,8 +259,17 @@ function getOrderedSupabaseData() {
 }
 
 async function fetchMasterlist() {
-    if(supabaseData.length === 0) masterlistTableBody.innerHTML = `<tr><td colspan="34" class="py-8 text-center text-blue-600 font-bold"><span class="loader"></span> Fetching latest data from cloud...</td></tr>`;
+    const syncBtn = document.getElementById('btnResync');
     
+    if(supabaseData.length === 0) {
+        masterlistTableBody.innerHTML = `<tr><td colspan="34" class="py-8 text-center text-blue-600 font-bold"><span class="loader"></span> Fetching latest data from cloud...</td></tr>`;
+    }
+    
+    if(syncBtn) {
+        syncBtn.innerHTML = '⏳ Syncing...';
+        syncBtn.disabled = true;
+    }
+
     try {
         const response = await fetch(supabaseUrl + '?select=*', {
             method: 'GET',
@@ -247,11 +284,29 @@ async function fetchMasterlist() {
         
         cloudIndicator.innerHTML = '🟢 Connected';
         cloudIndicator.classList.replace('text-gray-500', 'text-green-600');
+        
+        // BAGO: Timestamp ng pagkuha ng most updated data
+        const now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        
+        const lastTimeElement = document.getElementById('lastUpdateTime');
+        if(lastTimeElement) lastTimeElement.textContent = `Last updated: ${hours}:${minutes} ${ampm}`;
+
         renderMasterlist();
     } catch (error) {
         masterlistTableBody.innerHTML = `<tr><td colspan="34" class="py-8 text-center text-red-500 font-bold">Error loading database: ${error.message}</td></tr>`;
         cloudIndicator.innerHTML = '🔴 Offline';
         cloudIndicator.classList.replace('text-gray-500', 'text-red-600');
+    } finally {
+        if(syncBtn) {
+            syncBtn.innerHTML = '🔄 Resync';
+            syncBtn.disabled = false;
+        }
     }
 }
 
@@ -282,7 +337,7 @@ window.updateEditingInsights = function(rowId) {
 
     if (!panel || !editingRowId || editingRowId !== rowId) return;
 
-    const rowData = supabaseData.find(r => String(r.id || r.CustomerCode) === String(rowId));
+    const rowData = supabaseData.find(r => String(r['Primary Key'] || r.CustomerCode) === String(rowId));
     if (!rowData) return;
 
     if(codeEl) codeEl.textContent = rowData.CustomerCode || '-';
@@ -338,7 +393,7 @@ function renderMasterlist() {
 
     let rowIndex = 1;
     supabaseData.forEach(row => {
-        const rowId = row.id || row.CustomerCode;
+        const rowId = row['Primary Key'] || row.CustomerCode;
         const isEditing = String(editingRowId) === String(rowId);
         const isModifiedLocally = modifiedRows.has(rowId);
         
@@ -429,7 +484,7 @@ function renderMasterlist() {
     });
     
     supabaseData.forEach(row => {
-        const rowId = row.id || row.CustomerCode;
+        const rowId = row['Primary Key'] || row.CustomerCode;
         let autoFreq = window.allDays.filter(d => window.isValidStrNum(row[d])).length;
         if(autoFreq >= 5) {
             let trElem = document.getElementById('editing_tr_' + rowId);
@@ -442,7 +497,7 @@ window.assignNextSequence = function(rowId, day) {
     let max = 0;
     supabaseData.forEach(r => {
         let val = parseFloat(r[day]);
-        if (!isNaN(val) && String(r.id || r.CustomerCode) !== String(rowId)) {
+        if (!isNaN(val) && String(r['Primary Key'] || r.CustomerCode) !== String(rowId)) {
             if (val > max) max = val;
         }
     });
@@ -520,7 +575,7 @@ window.saveCurrentEdit = function() {
 
     updates['Frequency'] = count;
 
-    const index = supabaseData.findIndex(r => String(r.id || r.CustomerCode) === String(id));
+    const index = supabaseData.findIndex(r => String(r['Primary Key'] || r.CustomerCode) === String(id));
     if(index !== -1) {
         supabaseData[index] = { ...supabaseData[index], ...updates };
         modifiedRows.add(id);
@@ -552,7 +607,7 @@ window.confirmClearAll = function() {
     supabaseData.forEach(row => {
         window.allDays.forEach(d => row[d] = null);
         row.Frequency = 0;
-        modifiedRows.add(row.id || row.CustomerCode);
+        modifiedRows.add(row['Primary Key'] || row.CustomerCode);
     });
     btnSaveCloud.classList.remove('hidden');
     renderMasterlist();
@@ -568,13 +623,15 @@ window.saveToCloud = async function() {
 
     let promises = [];
     modifiedRows.forEach(id => {
-        const row = supabaseData.find(r => String(r.id || r.CustomerCode) === String(id));
+        const row = supabaseData.find(r => String(r['Primary Key'] || r.CustomerCode) === String(id));
         if(row) {
             let payload = { Frequency: row.Frequency };
             window.allDays.forEach(d => payload[d] = row[d]);
             
+            const queryParam = encodeURIComponent('"Primary Key"') + '=eq.' + encodeURIComponent(id);
+
             promises.push(
-                fetch(`${supabaseUrl}?id=eq.${id}`, {
+                fetch(`${supabaseUrl}?${queryParam}`, {
                     method: 'PATCH',
                     headers: {
                         'apikey': supabaseKey,
@@ -597,7 +654,9 @@ window.saveToCloud = async function() {
         cloudIndicator.innerHTML = '🟢 Connected';
         cloudIndicator.classList.replace('text-yellow-600', 'text-green-600');
         renderMasterlist(); 
-        alert("Successfully saved to cloud database!");
+        
+        // Pinalitan din ang alert() ng custom modal para sa general save edits
+        showSuccessModal("Changes successfully saved to the cloud database.");
     } catch(e) {
         alert("Error saving to cloud. Please try again.");
         btnSaveCloud.innerHTML = `☁️ Retry Save`;
@@ -610,7 +669,7 @@ window.downloadMasterlistExcel = function() {
     
     const exportData = supabaseData.map(row => {
         let cleanRow = {
-            "Primary Key": row.id || row.CustomerCode,
+            "Primary Key": row['Primary Key'] || row.CustomerCode,
             "Customer Name": row['Customer Name'],
             "Frequency": row.Frequency
         };

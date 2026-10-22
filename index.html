@@ -16,121 +16,18 @@
 
         <div id="mainContentContainer" class="w-full">
             
+            <!-- TABS ARRANGEMENT -->
             <div class="flex space-x-1 sm:space-x-2 border-b border-gray-300 mb-4 sm:mb-6 w-full overflow-x-auto hide-scroll pb-1">
-                <button class="py-2 px-3 sm:px-5 text-green-700 border-b-2 border-green-600 bg-green-50 font-bold rounded-t-md transition text-xs sm:text-sm whitespace-nowrap" id="tab-masterlist">Route Planner (Cloud)</button>
-                <button class="py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-lookup">Lookup Route</button>
+                <button class="py-2 px-3 sm:px-5 text-blue-700 border-b-2 border-blue-700 bg-blue-50 font-bold rounded-t-md transition text-xs sm:text-sm whitespace-nowrap" id="tab-lookup">Lookup Route</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-pivot">Dynamic Pivot</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-graphs">Graphs</button>
+                <button class="py-2 px-3 sm:px-5 text-green-600 border-b-2 border-transparent font-bold hover:text-green-700 transition text-xs sm:text-sm whitespace-nowrap" id="tab-masterlist">Route Planner (Cloud)</button>
             </div>
 
-            <!-- ROUTE PLANNER MASTERLIST -->
-            <div id="section-masterlist" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full">
-                
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 border-b border-gray-200 pb-3 gap-3">
-                    <h2 class="text-sm sm:text-lg font-bold text-gray-700 flex items-center gap-2">
-                        Route Planner (Cloud)
-                        <span id="cloudStatusIndicator" class="text-[9px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">Connecting...</span>
-                    </h2>
-                    
-                    <div class="hidden lg:flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
-                        <button onclick="openAddRouteModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
-                            ➕ Add Route
-                        </button>
-                        <button onclick="openClearColumnModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
-                            🧹 Clear Column
-                        </button>
-                        <button onclick="clearAllSchedules()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
-                            🗑️ Clear All
-                        </button>
-                        <button id="btnSaveCloud" onclick="saveToCloud()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
-                            ☁️ Save to Cloud
-                        </button>
-                        <button onclick="downloadMasterlistExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
-                            ⬇️ Download Excel
-                        </button>
-                    </div>
-                </div>
-
-                <div class="block lg:hidden bg-red-50 border border-red-200 p-4 sm:p-6 rounded-lg text-center my-4 shadow-sm mx-auto max-w-md">
-                    <p class="text-red-800 font-bold text-[11px] sm:text-base mb-1">🖥️ Desktop Access Only</p>
-                    <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
-                </div>
-
-                <div id="editingInsightsPanel" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 shadow-sm w-full ml-auto max-w-2xl transition-all">
-                    <h3 class="font-bold text-blue-800 text-xs sm:text-sm mb-2 border-b border-blue-200 pb-1 flex items-center gap-2">
-                        <span>📊</span> Editing Insights
-                    </h3>
-                    <div class="flex flex-col md:flex-row gap-3 sm:gap-6 items-start">
-                        <div class="text-xs sm:text-sm text-gray-700 flex flex-col gap-1 w-full md:w-1/2">
-                            <div class="flex"><span class="font-bold w-24">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
-                            <div class="flex"><span class="font-bold w-24">Customer:</span> <span id="insightCustomer">-</span></div>
-                            <div class="flex"><span class="font-bold w-24">Account:</span> <span id="insightAccount">-</span></div>
-                            <div class="flex"><span class="font-bold w-24">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
-                        </div>
-                        <div class="w-full md:w-1/2 flex flex-col items-center">
-                            <p id="insightMiniTableTitle" class="text-xs sm:text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide text-center w-full">Insights Table</p>
-                            <table class="w-full sm:w-5/6 text-xs sm:text-sm text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
-                                <thead class="bg-gray-100 border-b border-gray-300">
-                                    <tr>
-                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center border-r border-gray-300">Category</th>
-                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center">Sequence</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="insightMiniTableBody">
-                                    <tr><td colspan="2" class="p-2 text-center text-gray-400 italic">No schedule selected</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hidden lg:block w-full mx-auto border border-gray-200 rounded-md overflow-x-auto max-h-[75vh] overflow-y-auto relative bg-white shadow-sm pb-16">
-                    <table class="w-full bg-white text-left text-xs whitespace-nowrap auto-table min-w-[1000px]">
-                        <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-                            <tr class="text-[9px] sm:text-[10px]">
-                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[60px] bg-gray-100 sticky left-0 z-30">Action</th>
-                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[30px] bg-gray-100">Line</th>
-                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center bg-gray-100">Code</th>
-                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 customer-name-col">Customer Name</th>
-                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 text-center">Account</th>
-                                <th rowspan="2" class="fixed-40 border-r border-gray-200 bg-gray-100 align-middle text-center" title="Auto-computed Frequency">
-                                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Freq</div>
-                                </th>
-                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-emerald-50 text-emerald-800">Week 1</th>
-                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-rose-50 text-rose-800">Week 2</th>
-                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-amber-50 text-amber-800">Week 3</th>
-                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-cyan-50 text-cyan-800">Week 4</th>
-                            </tr>
-                            <tr class="bg-gray-50 border-b border-gray-300 text-gray-500 text-[8px] sm:text-[9px]">
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
-                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
-                            </tr>
-                        </thead>
-                        <tbody id="masterlistTableBody">
-                            <tr><td colspan="34" class="py-8 text-center text-blue-600 font-bold"><span class="loader"></span> Loading cloud database...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- FLOATING EDIT BAR -->
-            <div id="floatingEditBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white border border-gray-200 px-5 py-3 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-50 flex items-center justify-between gap-6 min-w-[350px]">
-                <div class="flex items-center gap-2 text-sm font-bold text-gray-700">
-                    <span class="animate-pulse h-2.5 w-2.5 bg-blue-500 rounded-full inline-block shadow-sm"></span> Editing Route Data
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="cancelInlineEdit()" class="bg-red-500 text-white hover:bg-red-600 px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Cancel</button>
-                    <button onclick="saveCurrentEdit()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Save Changes</button>
-                </div>
-            </div>
-
-            <!-- ================= LOOKUP ROUTE SECTION ================= -->
-            <div id="section-lookup" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full hidden">
+            <!-- ================= LOOKUP ROUTE SECTION (DEFAULT VIEW) ================= -->
+            <div id="section-lookup" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full">
                 <h2 class="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-gray-700">Lookup Route</h2>
                 
-                <!-- FIX: Pinaliit, tinanggal ang border box, at ginawang minimal ang Upload Section -->
                 <div class="mb-4 sm:mb-6 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pb-4 border-b border-gray-100">
                     <label for="excelFile" class="cursor-pointer inline-flex items-center justify-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold py-1.5 px-4 rounded-md border border-blue-200 transition text-[10px] sm:text-xs shadow-sm w-fit">
                         <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
@@ -250,6 +147,129 @@
                 </div>
             </div>
 
+            <!-- ================= ROUTE PLANNER MASTERLIST ================= -->
+            <div id="section-masterlist" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full hidden">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 border-b border-gray-200 pb-3 gap-3">
+                    <h2 class="text-sm sm:text-lg font-bold text-gray-700 flex flex-wrap items-center gap-2">
+                        Route Planner (Cloud)
+                        <span id="cloudStatusIndicator" class="text-[9px] sm:text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">Connecting...</span>
+                        
+                        <!-- BAGO: RESYNC BUTTON AT LAST UPDATE TIME -->
+                        <button id="btnResync" onclick="resyncData()" class="flex items-center gap-1 text-[9px] sm:text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition shadow-sm font-semibold">
+                            🔄 Resync
+                        </button>
+                        <span id="lastUpdateTime" class="text-[9px] sm:text-[10px] text-gray-400 font-normal ml-1"></span>
+                    </h2>
+                    
+                    <div class="hidden lg:flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
+                        <button onclick="openAddRouteModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ➕ Add Route
+                        </button>
+                        <button onclick="openClearColumnModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            🧹 Clear Column
+                        </button>
+                        <button onclick="clearAllSchedules()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            🗑️ Clear All
+                        </button>
+                        <button id="btnSaveCloud" onclick="saveToCloud()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ☁️ Save to Cloud
+                        </button>
+                        <button onclick="downloadMasterlistExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ⬇️ Download Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="block lg:hidden bg-red-50 border border-red-200 p-4 sm:p-6 rounded-lg text-center my-4 shadow-sm mx-auto max-w-md">
+                    <p class="text-red-800 font-bold text-[11px] sm:text-base mb-1">🖥️ Desktop Access Only</p>
+                    <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
+                </div>
+
+                <div id="editingInsightsPanel" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 shadow-sm w-full ml-auto max-w-2xl transition-all">
+                    <h3 class="font-bold text-blue-800 text-xs sm:text-sm mb-2 border-b border-blue-200 pb-1 flex items-center gap-2">
+                        <span>📊</span> Editing Insights
+                    </h3>
+                    <div class="flex flex-col md:flex-row gap-3 sm:gap-6 items-start">
+                        <div class="text-xs sm:text-sm text-gray-700 flex flex-col gap-1 w-full md:w-1/2">
+                            <div class="flex"><span class="font-bold w-24">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Customer:</span> <span id="insightCustomer">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Account:</span> <span id="insightAccount">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
+                        </div>
+                        <div class="w-full md:w-1/2 flex flex-col items-center">
+                            <p id="insightMiniTableTitle" class="text-xs sm:text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide text-center w-full">Insights Table</p>
+                            <table class="w-full sm:w-5/6 text-xs sm:text-sm text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
+                                <thead class="bg-gray-100 border-b border-gray-300">
+                                    <tr>
+                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center border-r border-gray-300">Category</th>
+                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center">Sequence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="insightMiniTableBody">
+                                    <tr><td colspan="2" class="p-2 text-center text-gray-400 italic">No schedule selected</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden lg:block w-full mx-auto border border-gray-200 rounded-md overflow-x-auto max-h-[75vh] overflow-y-auto relative bg-white shadow-sm pb-16">
+                    <table class="w-full bg-white text-left text-xs whitespace-nowrap auto-table min-w-[1000px]">
+                        <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+                            <tr class="text-[9px] sm:text-[10px]">
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[60px] bg-gray-100 sticky left-0 z-30">Action</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center w-[30px] bg-gray-100">Line</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 text-center bg-gray-100">Code</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 customer-name-col">Customer Name</th>
+                                <th rowspan="2" class="p-1 sm:p-2 border-r border-gray-200 bg-gray-100 text-center">Account</th>
+                                <th rowspan="2" class="fixed-40 border-r border-gray-200 bg-gray-100 align-middle text-center" title="Auto-computed Frequency">
+                                    <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Freq</div>
+                                </th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-emerald-50 text-emerald-800">Week 1</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-rose-50 text-rose-800">Week 2</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-amber-50 text-amber-800">Week 3</th>
+                                <th colspan="5" class="p-0.5 border-r border-gray-200 text-center bg-cyan-50 text-cyan-800">Week 4</th>
+                            </tr>
+                            <tr class="bg-gray-50 border-b border-gray-300 text-gray-500 text-[8px] sm:text-[9px]">
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                                <th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">M</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">T</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">W</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">Th</div></th><th class="fixed-40 border-r align-middle"><div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto text-center">F</div></th><th class="hidden p-0.5 text-center border-r">Sa</th><th class="hidden p-0.5 text-center border-r">Su</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterlistTableBody">
+                            <tr><td colspan="34" class="py-8 text-center text-blue-600 font-bold"><span class="loader"></span> Loading cloud database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FLOATING EDIT BAR -->
+            <div id="floatingEditBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white border border-gray-200 px-5 py-3 rounded-full shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-50 flex items-center justify-between gap-6 min-w-[350px]">
+                <div class="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <span class="animate-pulse h-2.5 w-2.5 bg-blue-500 rounded-full inline-block shadow-sm"></span> Editing Route Data
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="cancelInlineEdit()" class="bg-red-500 text-white hover:bg-red-600 px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Cancel</button>
+                    <button onclick="saveCurrentEdit()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">Save Changes</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- BAGO: SUCCESS POP-UP MODAL (Pang-replace sa alert) -->
+    <div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative transform transition-transform scale-100">
+            <div class="text-green-500 mb-4 flex justify-center">
+                <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Success!</h3>
+            <p id="successModalMessage" class="text-sm text-gray-600 mb-6">New route successfully added to the cloud database.</p>
+            <button onclick="closeSuccessModal()" class="bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-lg text-sm font-bold transition w-full shadow-sm">Okay</button>
         </div>
     </div>
 
