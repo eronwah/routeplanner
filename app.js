@@ -23,9 +23,11 @@ window.chartColors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#0
 // DOM Elements
 const fileInput = document.getElementById('excelFile');
 const uploadStatus = document.getElementById('uploadStatus');
+const uploadFileName = document.getElementById('uploadFileName'); // BAGO
 const daySelector = document.getElementById('daySelector');
 const resultTableBody = document.getElementById('resultTableBody');
 const totalCount = document.getElementById('totalCount');
+const lookupContentWrapper = document.getElementById('lookupContentWrapper');
 
 const tabLookup = document.getElementById('tab-lookup');
 const tabPivot = document.getElementById('tab-pivot');
@@ -64,7 +66,7 @@ const closeGraphModalBtnBottom = document.getElementById('closeGraphModalBtnBott
 window.isValidCell = (val) => { return typeof val === 'number' && !isNaN(val); };
 window.isValidStrNum = (val) => { return val !== null && val !== undefined && val !== '' && !isNaN(parseFloat(val)); };
 
-// FIX PARA SA MOBILE LOGOS: Striktong binalot sa isang 14px na div na may overflow hidden.
+// BAGO: MAS STRIKTONG MOBILE LOGO (max-height: 12px) PARA HINDI MAG-STRETCH ANG ROW
 window.getAccountLogo = (accountName) => {
     if (!accountName || accountName === '-') return '-';
     const acc = accountName.toString().toUpperCase();
@@ -77,14 +79,14 @@ window.getAccountLogo = (accountName) => {
 
     if (imgSrc) {
         return `
-            <div class="sm:hidden w-full flex items-center justify-center" style="height: 14px; overflow: hidden;">
-                <img src="${imgSrc}" alt="${accountName}" style="height: 100%; width: auto; max-width: 45px; object-fit: contain; display: block; margin: 0 auto;" loading="lazy">
+            <div class="sm:hidden flex items-center justify-center w-full" style="height: 12px; max-height: 12px; overflow: hidden;">
+                <img src="${imgSrc}" alt="${accountName}" style="height: 12px; max-height: 12px; width: auto; max-width: 35px; object-fit: contain; display: block; margin: 0 auto;" loading="lazy">
             </div>
-            <span class="font-medium hidden sm:inline-block text-[8px] sm:text-[10px]">${accountName}</span>
+            <span class="font-medium hidden sm:inline-block text-[9px] sm:text-[11px]">${accountName}</span>
         `;
     }
 
-    return `<span class="font-medium text-[8px] sm:text-[10px]">${accountName}</span>`;
+    return `<span class="font-medium text-[9px] sm:text-[11px] whitespace-nowrap">${accountName}</span>`;
 };
 
 window.disableScroll = () => { document.body.classList.add('overflow-hidden'); document.documentElement.classList.add('overflow-hidden'); };
@@ -124,6 +126,12 @@ tabMasterlist.addEventListener('click', () => switchTab('masterlist'));
 fileInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (uploadFileName) {
+        uploadFileName.textContent = "Selected: " + file.name;
+        uploadFileName.classList.remove('hidden');
+    }
+
     uploadStatus.innerHTML = `Reading file, please wait...`;
     uploadStatus.className = "mt-1 sm:mt-2 text-blue-600 font-semibold text-[9px] sm:text-sm";
 
@@ -165,12 +173,13 @@ fileInput.addEventListener('change', function(e) {
 
         daySelector.disabled = false; graphWeekSelector.disabled = false; graphCategorySelector.disabled = false;
         
-        [tabLookup, tabPivot, tabGraphs].forEach(btn => {
+        [tabPivot, tabGraphs].forEach(btn => {
             btn.classList.remove('hidden');
             btn.classList.add('fade-in-tab');
         });
 
-        switchTab('lookup');
+        lookupContentWrapper.classList.remove('hidden');
+        lookupContentWrapper.classList.add('fade-in-tab');
 
         if(!daySelector.value) {
             resultTableBody.innerHTML = `<tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select Day/Week.</td></tr>`;
@@ -230,14 +239,14 @@ function performSearch() {
             codeHTML = `<span class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition" onclick="openCustomerModal('${customerCode}')">${customerCode}</span>`;
         }
 
-        // FIX: Pinaliit nang husto (8px at 9px)
+        // BAGO: Gumamit ng whitespace-nowrap sa mga sumusunod na column para hinding hindi mag dodouble line. Naka-center din lahat maliban sa Customer Name
         resultTableBody.innerHTML += `
         <tr class="hover:bg-blue-50 transition border-b border-gray-100">
-            <td class="font-semibold text-gray-800 text-center py-0.5 sm:py-1 text-[9px] sm:text-[11px]">${row[selectedDay]}</td>
-            <td class="font-mono font-bold text-center py-0.5 sm:py-1 text-[9px] sm:text-[11px]">${codeHTML}</td>
-            <td class="text-gray-700 font-medium leading-tight text-center sm:text-left py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${row['Customer Name'] || '-'}</td>
-            <td class="text-center py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${accountDisplay}</td>
-            <td class="text-gray-500 leading-tight text-center py-0.5 sm:py-1 text-[8px] sm:text-[10px]">${row['CITY'] || '-'}</td>
+            <td class="font-semibold text-gray-800 text-center py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] whitespace-nowrap">${row[selectedDay]}</td>
+            <td class="font-mono font-bold text-center py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] whitespace-nowrap">${codeHTML}</td>
+            <td class="text-gray-700 font-bold leading-tight text-center sm:text-left py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] min-w-[100px]">${row['Customer Name'] || '-'}</td>
+            <td class="text-center py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] whitespace-nowrap">${accountDisplay}</td>
+            <td class="text-gray-500 font-semibold text-center py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] whitespace-nowrap">${row['CITY'] || '-'}</td>
         </tr>`;
     });
 }

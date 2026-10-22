@@ -14,21 +14,11 @@
     <div class="container mx-auto p-1 sm:p-6 max-w-[98%] xl:max-w-[98%]">
         <h1 class="text-lg sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-6 border-b border-gray-200 pb-2 sm:pb-4 text-center">Route List Planner</h1>
 
-        <div class="bg-white p-3 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-4 sm:mb-6 w-full max-w-4xl mx-auto">
-            <h2 class="text-sm sm:text-lg font-bold mb-2 sm:mb-3 text-gray-700">Upload Main Data (.xlsx)</h2>
-            <div class="w-full">
-                <input type="file" id="excelFile" accept=".xlsx" class="block w-full text-xs sm:text-sm text-gray-500
-                    file:mr-2 sm:file:mr-4 file:py-1.5 sm:file:py-2.5 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:font-semibold
-                    file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg p-1.5 sm:p-2 transition">
-            </div>
-            <p id="uploadStatus" class="mt-1 sm:mt-2 text-[9px] sm:text-sm text-gray-500 italic">Upload an Excel file to unlock Insights and Lookups.</p>
-        </div>
-
         <div id="mainContentContainer" class="w-full">
             
             <div class="flex space-x-1 sm:space-x-2 border-b border-gray-300 mb-4 sm:mb-6 w-full overflow-x-auto hide-scroll pb-1">
                 <button class="py-2 px-3 sm:px-5 text-green-700 border-b-2 border-green-600 bg-green-50 font-bold rounded-t-md transition text-xs sm:text-sm whitespace-nowrap" id="tab-masterlist">Route Planner (Cloud)</button>
-                <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-lookup">Lookup Route</button>
+                <button class="py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-lookup">Lookup Route</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-pivot">Dynamic Pivot</button>
                 <button class="hidden py-2 px-3 sm:px-5 text-gray-500 border-b-2 border-transparent font-semibold hover:text-blue-600 transition text-xs sm:text-sm whitespace-nowrap" id="tab-graphs">Graphs</button>
             </div>
@@ -43,6 +33,9 @@
                     </h2>
                     
                     <div class="hidden lg:flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
+                        <button onclick="openAddRouteModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
+                            ➕ Add Route
+                        </button>
                         <button onclick="openClearColumnModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center">
                             🧹 Clear Column
                         </button>
@@ -63,29 +56,28 @@
                     <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
                 </div>
 
-                <!-- EDITING INSIGHTS PANEL -->
-                <div id="editingInsightsPanel" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mb-4 shadow-sm w-full ml-auto max-w-2xl transition-all">
-                    <h3 class="font-bold text-blue-800 text-[10px] sm:text-xs mb-1.5 border-b border-blue-200 pb-1 flex items-center gap-2">
+                <div id="editingInsightsPanel" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 shadow-sm w-full ml-auto max-w-2xl transition-all">
+                    <h3 class="font-bold text-blue-800 text-xs sm:text-sm mb-2 border-b border-blue-200 pb-1 flex items-center gap-2">
                         <span>📊</span> Editing Insights
                     </h3>
-                    <div class="flex flex-col md:flex-row gap-2 sm:gap-4 items-start">
-                        <div class="text-[9px] sm:text-[10px] text-gray-700 flex flex-col gap-0.5 w-full md:w-1/2">
-                            <div class="flex"><span class="font-bold w-20">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
-                            <div class="flex"><span class="font-bold w-20">Customer:</span> <span id="insightCustomer">-</span></div>
-                            <div class="flex"><span class="font-bold w-20">Account:</span> <span id="insightAccount">-</span></div>
-                            <div class="flex"><span class="font-bold w-20">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
+                    <div class="flex flex-col md:flex-row gap-3 sm:gap-6 items-start">
+                        <div class="text-xs sm:text-sm text-gray-700 flex flex-col gap-1 w-full md:w-1/2">
+                            <div class="flex"><span class="font-bold w-24">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Customer:</span> <span id="insightCustomer">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Account:</span> <span id="insightAccount">-</span></div>
+                            <div class="flex"><span class="font-bold w-24">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
                         </div>
                         <div class="w-full md:w-1/2 flex flex-col items-center">
-                            <p id="insightMiniTableTitle" class="text-[8px] sm:text-[9px] font-bold text-gray-500 mb-1 uppercase tracking-wide text-center w-full">Insights Table</p>
-                            <table class="w-full sm:w-5/6 text-[8px] sm:text-[9px] text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
+                            <p id="insightMiniTableTitle" class="text-xs sm:text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide text-center w-full">Insights Table</p>
+                            <table class="w-full sm:w-5/6 text-xs sm:text-sm text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
                                 <thead class="bg-gray-100 border-b border-gray-300">
                                     <tr>
-                                        <th class="p-0.5 px-1 font-bold text-gray-700 w-1/2 text-center border-r border-gray-300">Category</th>
-                                        <th class="p-0.5 px-1 font-bold text-gray-700 w-1/2 text-center">Sequence</th>
+                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center border-r border-gray-300">Category</th>
+                                        <th class="p-1.5 px-2 font-bold text-gray-700 w-1/2 text-center">Sequence</th>
                                     </tr>
                                 </thead>
                                 <tbody id="insightMiniTableBody">
-                                    <tr><td colspan="2" class="p-1 text-center text-gray-400 italic">No schedule selected</td></tr>
+                                    <tr><td colspan="2" class="p-2 text-center text-gray-400 italic">No schedule selected</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -137,32 +129,48 @@
             <!-- ================= LOOKUP ROUTE SECTION ================= -->
             <div id="section-lookup" class="bg-white p-2 sm:p-6 rounded-xl shadow-sm border border-gray-200 w-full hidden">
                 <h2 class="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-gray-700">Lookup Route</h2>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3 mb-4 sm:mb-6 w-full">
-                    <div class="w-full sm:w-64">
-                        <label class="block text-[10px] sm:text-sm font-bold text-gray-700 mb-1">Select Day/Week</label>
-                        <select id="daySelector" class="border border-gray-300 rounded-lg p-1.5 sm:p-2.5 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-[10px] sm:text-sm outline-none cursor-pointer" disabled>
-                            <option value="">-- Select --</option>
-                        </select>
+                
+                <!-- FIX: Pinaliit, tinanggal ang border box, at ginawang minimal ang Upload Section -->
+                <div class="mb-4 sm:mb-6 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pb-4 border-b border-gray-100">
+                    <label for="excelFile" class="cursor-pointer inline-flex items-center justify-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold py-1.5 px-4 rounded-md border border-blue-200 transition text-[10px] sm:text-xs shadow-sm w-fit">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Upload Excel File</span>
+                    </label>
+                    <input type="file" id="excelFile" accept=".xlsx" class="hidden">
+                    <div class="flex flex-col justify-center">
+                        <p id="uploadFileName" class="text-[10px] sm:text-xs font-bold text-blue-600 hidden m-0 leading-none mb-1"></p>
+                        <p id="uploadStatus" class="text-[9px] sm:text-[10px] text-gray-500 italic m-0 leading-none">Please upload data to unlock lookup features.</p>
                     </div>
                 </div>
-                
-                <div id="totalCount" class="mb-4 w-full flex justify-center hidden"></div>
-                
-                <div class="w-full border border-gray-200 rounded-md overflow-hidden">
-                    <table class="w-full table-auto bg-white text-left text-[9px] sm:text-sm">
-                        <thead class="bg-gray-100 border-b border-gray-200">
-                            <tr class="text-[9px] sm:text-[11px]">
-                                <th class="font-bold text-gray-800 text-center w-[12%] p-1 sm:p-2">Seq</th>
-                                <th class="font-bold text-gray-800 text-center w-[18%] p-1 sm:p-2">Code</th>
-                                <th class="font-bold text-gray-800 text-center w-[35%] p-1 sm:p-2">Customer</th>
-                                <th class="font-bold text-gray-800 text-center w-[15%] p-1 sm:p-2">Account</th>
-                                <th class="font-bold text-gray-800 text-center w-[20%] p-1 sm:p-2">City</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultTableBody">
-                            <tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select a day.</td></tr>
-                        </tbody>
-                    </table>
+
+                <div id="lookupContentWrapper" class="hidden">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3 mb-4 sm:mb-6 w-full">
+                        <div class="w-full sm:w-64">
+                            <label class="block text-[10px] sm:text-sm font-bold text-gray-700 mb-1">Select Day/Week</label>
+                            <select id="daySelector" class="border border-gray-300 rounded-lg p-1.5 sm:p-2.5 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-[10px] sm:text-sm outline-none cursor-pointer" disabled>
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="totalCount" class="mb-4 w-full flex justify-center hidden"></div>
+                    
+                    <div class="w-full border border-gray-200 rounded-md overflow-hidden">
+                        <table class="w-full table-auto bg-white text-left text-[9px] sm:text-sm">
+                            <thead class="bg-gray-100 border-b border-gray-200">
+                                <tr class="text-[9px] sm:text-[11px]">
+                                    <th class="font-bold text-gray-800 text-center w-[12%] p-1 sm:p-2">Seq</th>
+                                    <th class="font-bold text-gray-800 text-center w-[18%] p-1 sm:p-2">Code</th>
+                                    <th class="font-bold text-gray-800 text-center w-[35%] p-1 sm:p-2">Customer</th>
+                                    <th class="font-bold text-gray-800 text-center w-[15%] p-1 sm:p-2">Account</th>
+                                    <th class="font-bold text-gray-800 text-center w-[20%] p-1 sm:p-2">City</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultTableBody">
+                                <tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select a day.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -245,8 +253,82 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    
+    <!-- ADD ROUTE MODAL (FORM) -->
+    <div id="addRouteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h3 class="text-lg font-bold text-gray-800">Add New Route</h3>
+                <button onclick="closeAddRouteModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div class="hidden">
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Primary Key</label>
+                    <input type="text" id="newPrimaryKey" value="Auto Generated" disabled class="w-full border border-gray-300 bg-gray-100 rounded-lg p-2 text-xs text-gray-500">
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Customer Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCustomerName" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Account <span class="text-red-500">*</span></label>
+                    <input type="text" id="newAccount" oninput="this.value = this.value.toUpperCase()" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">City <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCity" oninput="this.value = this.value.toUpperCase()" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Customer Code <span class="text-red-500">*</span></label>
+                    <input type="text" id="newCustomerCode" class="w-full border border-gray-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Position Code</label>
+                        <input type="text" id="newPositionCode" value="IC003CAB" readonly class="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 text-xs text-gray-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] sm:text-xs font-bold text-gray-600 block mb-1">Sales Office</label>
+                        <input type="text" id="newSalesOffice" value="CABANATUAN" readonly class="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 text-xs text-gray-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 justify-end mt-5">
+                <button onclick="closeAddRouteModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold w-full sm:w-auto transition">Cancel</button>
+                <button onclick="proceedToAddRouteConfirm()" class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg text-sm font-bold w-full sm:w-auto transition shadow-sm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL PARA SA ADD ROUTE -->
+    <div id="confirmAddRouteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-blue-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Save New Route?</h3>
+            <p class="text-sm text-gray-600 mb-6">Are you sure you want to add this new data to the cloud database? This action will sync immediately.</p>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeConfirmAddRoute()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button id="btnFinalSaveRoute" onclick="saveNewRoute()" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALIDATION ERROR MODAL -->
+    <div id="validationErrorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[70] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-red-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Missing Information</h3>
+            <p class="text-sm text-gray-600 mb-6">Please fill in all required fields to continue.</p>
+            <button onclick="closeValidationErrorModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-bold transition w-full">Okay, Got it</button>
+        </div>
+    </div>
+
     <!-- CLEAR COLUMN SELECTION MODAL -->
     <div id="clearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
@@ -255,12 +337,10 @@
             </div>
             <h3 class="text-lg font-bold text-gray-800 mb-2">Clear Specific Column</h3>
             <p class="text-sm text-gray-600 mb-4">Which column do you want to delete/clear?</p>
-            
             <div class="text-left mb-6 relative">
                 <input list="dayColumnOptions" id="clearColumnInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type or select a day...">
                 <datalist id="dayColumnOptions"></datalist>
             </div>
-
             <div class="flex gap-3 justify-center">
                 <button onclick="closeClearColumnModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
                 <button onclick="confirmClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Clear Column</button>
@@ -268,7 +348,6 @@
         </div>
     </div>
 
-    <!-- BAGO: CONFIRMATION MODAL PARA SA CLEAR COLUMN -->
     <div id="confirmClearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
             <div class="text-orange-500 mb-3 flex justify-center">
@@ -276,7 +355,6 @@
             </div>
             <h3 class="text-lg font-bold text-gray-800 mb-2">Are you sure?</h3>
             <p class="text-sm text-gray-600 mb-6">You are about to clear all schedules for <span id="confirmColumnNameText" class="font-bold text-gray-900"></span>. You still need to click <b>Save to Cloud</b> after this.</p>
-            
             <div class="flex gap-3 justify-center">
                 <button onclick="cancelConfirmClearColumn()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
                 <button onclick="proceedClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Clear</button>
