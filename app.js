@@ -23,7 +23,7 @@ window.chartColors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#0
 // DOM Elements
 const fileInput = document.getElementById('excelFile');
 const uploadStatus = document.getElementById('uploadStatus');
-const uploadFileName = document.getElementById('uploadFileName'); // BAGO
+const uploadFileName = document.getElementById('uploadFileName'); 
 const daySelector = document.getElementById('daySelector');
 const resultTableBody = document.getElementById('resultTableBody');
 const totalCount = document.getElementById('totalCount');
@@ -63,10 +63,10 @@ const closeGraphModalBtn = document.getElementById('closeGraphModalBtn');
 const closeGraphModalBtnBottom = document.getElementById('closeGraphModalBtnBottom');
 
 // Global Helpers
-window.isValidCell = (val) => { return typeof val === 'number' && !isNaN(val); };
-window.isValidStrNum = (val) => { return val !== null && val !== undefined && val !== '' && !isNaN(parseFloat(val)); };
+window.isValidCell = (val) => { return val !== null && val !== undefined && String(val).trim() !== '' && !isNaN(parseFloat(val)); };
+window.isValidStrNum = window.isValidCell;
 
-// BAGO: MAS STRIKTONG MOBILE LOGO (max-height: 12px) PARA HINDI MAG-STRETCH ANG ROW
+// MAS STRIKTONG MOBILE LOGO (max-height: 12px) PARA HINDI MAG-STRETCH ANG ROW
 window.getAccountLogo = (accountName) => {
     if (!accountName || accountName === '-') return '-';
     const acc = accountName.toString().toUpperCase();
@@ -123,6 +123,10 @@ tabGraphs.addEventListener('click', () => switchTab('graphs'));
 tabMasterlist.addEventListener('click', () => switchTab('masterlist'));
 
 // ================= EXCEL UPLOAD =================
+fileInput.addEventListener('click', function(e) {
+    e.target.value = null; 
+});
+
 fileInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -137,58 +141,91 @@ fileInput.addEventListener('change', function(e) {
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const sheetName = 'IC003CAB OCTOBER - FINAL';
-        
-        if(!workbook.SheetNames.includes(sheetName)) {
-            uploadStatus.innerHTML = `Error: Sheet not found. <br><span class="text-red-700">Make sure the exact tab name is <b>"IC003CAB OCTOBER - FINAL"</b>.</span>`;
-            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
-            return;
-        }
-        
-        let parsedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-        
-        if (parsedData.length === 0 || (!parsedData[0].hasOwnProperty('Customer Name') && !parsedData[0].hasOwnProperty('Account'))) {
-            uploadStatus.innerHTML = `Error: Invalid data format. <br><span class="text-red-700">Missing <b>Customer Name</b> or <b>Account</b>.</span>`;
-            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
-            window.globalExcelData = [];
-            return;
-        }
-
-        window.globalExcelData = parsedData;
-        uploadStatus.innerHTML = `Success! File data loaded. Analytics and Lookup are now unlocked.`;
-        uploadStatus.className = "mt-1 sm:mt-2 text-green-600 font-semibold text-[9px] sm:text-sm";
-
-        daySelector.innerHTML = '<option value="">-- Select --</option>';
-        window.allDays.forEach(day => {
-            const hasData = window.globalExcelData.some(row => window.isValidCell(row[day]));
-            if(hasData) {
-                let dayPrefix = day.substring(0, 3);
-                let weekNum = day.substring(3);
-                let fullDayName = (window.dayNamesMap[dayPrefix] || dayPrefix) + ' ' + weekNum + ' (' + day + ')';
-                daySelector.innerHTML += `<option value="${day}">${fullDayName}</option>`;
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            
+            // STRICT TAB NAME REQUIREMENT: Dapat IC003CAB OCTOBER - FINAL
+            const sheetName = 'IC003CAB OCTOBER - FINAL';
+            
+            if(!workbook.SheetNames.includes(sheetName)) {
+                uploadStatus.innerHTML = `Error: Sheet not found. <br><span class="text-red-700">Make sure the exact tab name is <b>"IC003CAB OCTOBER - FINAL"</b>.</span>`;
+                uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
+                return;
             }
-        });
+            
+            // Diretso nang basahin ang tamang tab
+            let rawParsedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            
+            // NORMALIZER
+            let parsedData = rawParsedData.map(row => {
+                let normalizedRow = {};
+                for (let key in row) {
+                    let compressedKey = String(key).trim().toUpperCase().replace(/\s/g, '');
+                    
+                    if (compressedKey === 'CITY') {
+                        normalizedRow['CITY'] = row[key]; 
+                    } else if (compressedKey === 'CUSTOMERNAME') {
+                        normalizedRow['Customer Name'] = row[key];
+                    } else if (compressedKey === 'ACCOUNT') {
+                        normalizedRow['Account'] = row[key];
+                    } else if (compressedKey === 'CUSTOMERCODE') {
+                        normalizedRow['CustomerCode'] = String(row[key]);
+                    } else if (compressedKey === 'POSITIONCODE') {
+                        normalizedRow['PositionCode'] = row[key];
+                    } else {
+                        normalizedRow[key] = row[key];
+                    }
+                }
+                return normalizedRow;
+            });
 
-        daySelector.disabled = false; graphWeekSelector.disabled = false; graphCategorySelector.disabled = false;
-        
-        [tabPivot, tabGraphs].forEach(btn => {
-            btn.classList.remove('hidden');
-            btn.classList.add('fade-in-tab');
-        });
+            let hasValidRow = parsedData.some(row => row['Customer Name'] || row['Account'] || row['CustomerCode']);
+            if (!hasValidRow) {
+                uploadStatus.innerHTML = `Error: Invalid data format. <br><span class="text-red-700">Missing <b>Customer Name</b> or <b>Account</b> columns.</span>`;
+                uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
+                window.globalExcelData = [];
+                return;
+            }
 
-        lookupContentWrapper.classList.remove('hidden');
-        lookupContentWrapper.classList.add('fade-in-tab');
+            window.globalExcelData = parsedData;
+            uploadStatus.innerHTML = `Success! File data loaded. Analytics and Lookup are now unlocked.`;
+            uploadStatus.className = "mt-1 sm:mt-2 text-green-600 font-semibold text-[9px] sm:text-sm";
 
-        if(!daySelector.value) {
-            resultTableBody.innerHTML = `<tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select Day/Week.</td></tr>`;
-        } else {
-            performSearch();
+            daySelector.innerHTML = '<option value="">-- Select --</option>';
+            window.allDays.forEach(day => {
+                const hasData = window.globalExcelData.some(row => window.isValidCell(row[day]));
+                if(hasData) {
+                    let dayPrefix = day.substring(0, 3);
+                    let weekNum = day.substring(3);
+                    let fullDayName = (window.dayNamesMap[dayPrefix] || dayPrefix) + ' ' + weekNum + ' (' + day + ')';
+                    daySelector.innerHTML += `<option value="${day}">${fullDayName}</option>`;
+                }
+            });
+
+            daySelector.disabled = false; graphWeekSelector.disabled = false; graphCategorySelector.disabled = false;
+            
+            [tabPivot, tabGraphs].forEach(btn => {
+                btn.classList.remove('hidden');
+                btn.classList.add('fade-in-tab');
+            });
+
+            lookupContentWrapper.classList.remove('hidden');
+            lookupContentWrapper.classList.add('fade-in-tab');
+
+            if(!daySelector.value) {
+                resultTableBody.innerHTML = `<tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select Day/Week.</td></tr>`;
+            } else {
+                performSearch();
+            }
+
+            if(!secPivot.classList.contains('hidden')) generateDynamicPivot(window.globalExcelData);
+            if(!secGraphs.classList.contains('hidden')) renderGraphs();
+        } catch (error) {
+            console.error(error);
+            uploadStatus.innerHTML = `Error reading Excel file. <br><span class="text-red-700">Make sure it's a valid Excel (.xlsx) file.</span>`;
+            uploadStatus.className = "mt-1 sm:mt-2 text-red-600 font-bold text-[9px] sm:text-sm";
         }
-
-        if(!secPivot.classList.contains('hidden')) generateDynamicPivot(window.globalExcelData);
-        if(!secGraphs.classList.contains('hidden')) renderGraphs();
     };
     reader.readAsArrayBuffer(file);
 });
@@ -196,8 +233,12 @@ fileInput.addEventListener('change', function(e) {
 // ================= LOOKUP ROUTE LOGIC =================
 function performSearch() {
     const selectedDay = daySelector.value;
+    const btnDownloadImage = document.getElementById('btnDownloadImage');
+
     if(!selectedDay) {
         totalCount.classList.add('hidden');
+        if(btnDownloadImage) btnDownloadImage.classList.add('hidden');
+        
         if(window.globalExcelData.length > 0) {
             resultTableBody.innerHTML = `<tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500 font-medium">Please select Day/Week.</td></tr>`;
         } else {
@@ -227,19 +268,22 @@ function performSearch() {
     resultTableBody.innerHTML = '';
     
     if(filteredData.length === 0) {
+        if(btnDownloadImage) btnDownloadImage.classList.add('hidden');
         resultTableBody.innerHTML = `<tr><td colspan="5" class="py-4 sm:py-6 text-center text-gray-500">No schedule found for this day.</td></tr>`; 
         return;
     }
     
+    if(btnDownloadImage) btnDownloadImage.classList.remove('hidden');
+
     filteredData.forEach(row => {
         const accountDisplay = window.getAccountLogo(row['Account'] || '-');
         const customerCode = row['CustomerCode'] || '-';
         let codeHTML = customerCode;
+        
         if(customerCode !== '-') {
             codeHTML = `<span class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition" onclick="openCustomerModal('${customerCode}')">${customerCode}</span>`;
         }
 
-        // BAGO: Gumamit ng whitespace-nowrap sa mga sumusunod na column para hinding hindi mag dodouble line. Naka-center din lahat maliban sa Customer Name
         resultTableBody.innerHTML += `
         <tr class="hover:bg-blue-50 transition border-b border-gray-100">
             <td class="font-semibold text-gray-800 text-center py-1.5 px-1 sm:px-2 text-[9px] sm:text-[11px] whitespace-nowrap">${row[selectedDay]}</td>
@@ -253,6 +297,77 @@ function performSearch() {
 
 daySelector.addEventListener('change', performSearch);
 
+// ================= DOWNLOAD IMAGE LOGIC =================
+window.downloadLookupImage = function() {
+    const captureArea = document.getElementById('lookupCaptureArea');
+    const btn = document.getElementById('btnDownloadImage');
+    const daySelectEl = document.getElementById('daySelector');
+    
+    if (!captureArea || !btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...';
+    btn.disabled = true;
+
+    let selectedDayText = 'Schedule';
+    if (daySelectEl && daySelectEl.selectedIndex > 0) {
+        selectedDayText = daySelectEl.options[daySelectEl.selectedIndex].text.split(' (')[0];
+    }
+    
+    const today = new Date();
+    const dateStr = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-${today.getFullYear()}`;
+    const fileName = `${selectedDayText} - ${dateStr}.png`;
+
+    // FIX PARA SA MOBILE VIEW: Force expansion ng elements
+    const originalWidth = captureArea.style.width;
+    const originalMaxWidth = captureArea.style.maxWidth;
+    const originalOverflow = captureArea.style.overflow;
+
+    captureArea.style.width = captureArea.scrollWidth + 'px';
+    captureArea.style.maxWidth = 'none';
+    captureArea.style.overflow = 'visible';
+    
+    const tableWrapper = captureArea.querySelector('.overflow-hidden');
+    let tableWrapperOriginalOverflow = '';
+    if (tableWrapper) {
+        tableWrapperOriginalOverflow = tableWrapper.style.overflow;
+        tableWrapper.style.overflow = 'visible';
+    }
+
+    setTimeout(() => {
+        html2canvas(captureArea, { 
+            scale: 2, 
+            backgroundColor: '#ffffff', 
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            // Restore styles
+            captureArea.style.width = originalWidth;
+            captureArea.style.maxWidth = originalMaxWidth;
+            captureArea.style.overflow = originalOverflow;
+            if (tableWrapper) tableWrapper.style.overflow = tableWrapperOriginalOverflow;
+            
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error("Error generating image:", err);
+            captureArea.style.width = originalWidth;
+            captureArea.style.maxWidth = originalMaxWidth;
+            captureArea.style.overflow = originalOverflow;
+            if (tableWrapper) tableWrapper.style.overflow = tableWrapperOriginalOverflow;
+            
+            alert("Failed to download image. Please try again.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }, 400);
+};
+
 window.openCustomerModal = function(code) {
     const rowData = window.globalExcelData.find(r => String(r['CustomerCode']) === String(code));
     if(!rowData) return;
@@ -262,23 +377,28 @@ window.openCustomerModal = function(code) {
         if (window.isValidCell(rowData[day])) scheduleList.push(day.replace(/(\D+)(\d+)/, '$1 $2'));
     });
 
+    let custName = rowData['Customer Name'] || '-';
+    let accName = rowData['Account'] || '-';
+    let custCode = rowData['CustomerCode'] || '-';
+    let posCode = rowData['PositionCode'] || '-';
+
     modalContent.innerHTML = `
         <div class="flex flex-col space-y-2 text-left px-2 sm:px-4 border-b border-gray-100 pb-3">
             <div class="flex flex-col">
                 <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Customer Name</span>
-                <span class="font-semibold text-gray-800 text-[10px] sm:text-sm break-words mt-0.5">${rowData['Customer Name'] || '-'}</span>
+                <span class="font-semibold text-gray-800 text-[10px] sm:text-sm break-words mt-0.5">${custName}</span>
             </div>
             <div class="flex flex-col">
                 <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Account</span>
-                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${rowData['Account'] || '-'}</span>
+                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${accName}</span>
             </div>
             <div class="flex flex-col">
                 <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Code</span>
-                <span class="font-mono font-bold text-blue-600 text-[10px] sm:text-sm mt-0.5">${rowData['CustomerCode'] || '-'}</span>
+                <span class="font-mono font-bold text-blue-600 text-[10px] sm:text-sm mt-0.5">${custCode}</span>
             </div>
             <div class="flex flex-col">
                 <span class="text-gray-500 font-bold text-[9px] sm:text-xs uppercase tracking-wide">Position Code</span>
-                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${rowData['PositionCode'] || '-'}</span>
+                <span class="font-semibold text-gray-700 text-[10px] sm:text-sm mt-0.5">${posCode}</span>
             </div>
         </div>
 
@@ -321,9 +441,11 @@ window.openWeeklyModal = function(weekId) {
             gridRows = `<div class="col-span-2 text-center text-gray-500 py-3 italic text-xs sm:text-sm">No schedule available</div>`;
         } else {
             dayData.forEach(r => {
+                let custName = r['Customer Name'] || '-';
+                let accName = r['Account'] || '-';
                 gridRows += `
-                    <div class="py-2 border-b border-gray-100 text-gray-700 font-medium text-center break-words flex items-center justify-center">${r['Customer Name'] || '-'}</div>
-                    <div class="py-2 border-b border-gray-100 text-gray-600 text-center px-2 whitespace-nowrap flex items-center justify-center">${r['Account'] || '-'}</div>
+                    <div class="py-2 border-b border-gray-100 text-gray-700 font-medium text-center break-words flex items-center justify-center">${custName}</div>
+                    <div class="py-2 border-b border-gray-100 text-gray-600 text-center px-2 whitespace-nowrap flex items-center justify-center">${accName}</div>
                 `;
             });
         }
