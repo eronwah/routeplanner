@@ -5,6 +5,7 @@
 let supabaseData = [];    
 let editingRowId = null;  
 let modifiedRows = new Set(); 
+let targetColumnToClear = null; 
 
 const supabaseUrl = 'https://zguemnrszulnzsneqzek.supabase.co/rest/v1/route_schedules';
 const supabaseKey = 'sb_publishable_vIKFtbZYeTs9nZf-Oq-OtA_QzTzqLra';
@@ -16,6 +17,13 @@ const btnSaveCloud = document.getElementById('btnSaveCloud');
 document.addEventListener('DOMContentLoaded', () => {
     fetchMasterlist();
     populateClearColumnOptions();
+});
+
+// ESCAPE KEY LOGIC PARA MAG CANCEL
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && editingRowId !== null) {
+        window.cancelInlineEdit();
+    }
 });
 
 function populateClearColumnOptions() {
@@ -65,26 +73,41 @@ window.confirmClearColumn = function() {
         return;
     }
 
-    if(confirm(`Are you sure you want to clear all schedules for ${inputVal}?\n\nYou still need to click "Save to Cloud" after this.`)) {
-        document.getElementById('clearColumnModal').classList.add('hidden');
-        
-        supabaseData.forEach(row => {
-            if(row[targetKey] !== null && row[targetKey] !== '') {
-                row[targetKey] = null; 
-                
-                let count = 0;
-                window.allDays.forEach(d => {
-                    if (window.isValidStrNum(row[d])) count++;
-                });
-                row.Frequency = count;
-                
-                modifiedRows.add(row.id || row.CustomerCode);
-            }
-        });
-        
-        btnSaveCloud.classList.remove('hidden');
-        renderMasterlist();
-    }
+    targetColumnToClear = targetKey;
+    document.getElementById('confirmColumnNameText').innerText = inputVal;
+    
+    document.getElementById('clearColumnModal').classList.add('hidden');
+    document.getElementById('confirmClearColumnModal').classList.remove('hidden');
+};
+
+window.cancelConfirmClearColumn = function() {
+    document.getElementById('confirmClearColumnModal').classList.add('hidden');
+    document.getElementById('clearColumnModal').classList.remove('hidden');
+    targetColumnToClear = null;
+};
+
+window.proceedClearColumn = function() {
+    if (!targetColumnToClear) return;
+    
+    document.getElementById('confirmClearColumnModal').classList.add('hidden');
+    
+    supabaseData.forEach(row => {
+        if(row[targetColumnToClear] !== null && row[targetColumnToClear] !== '') {
+            row[targetColumnToClear] = null; 
+            
+            let count = 0;
+            window.allDays.forEach(d => {
+                if (window.isValidStrNum(row[d])) count++;
+            });
+            row.Frequency = count;
+            
+            modifiedRows.add(row.id || row.CustomerCode);
+        }
+    });
+    
+    btnSaveCloud.classList.remove('hidden');
+    renderMasterlist();
+    targetColumnToClear = null; 
 };
 
 function getMasterScore(row) {
@@ -138,6 +161,81 @@ async function fetchMasterlist() {
     }
 }
 
+// BAGO: DYNAMIC FETCHING NG DOM PARA HINDI MAWALA ANG INSIGHTS
+function clearInsightsPanel() {
+    const codeEl = document.getElementById('insightCode');
+    const custEl = document.getElementById('insightCustomer');
+    const accEl = document.getElementById('insightAccount');
+    const freqEl = document.getElementById('insightFrequency');
+    const titleEl = document.getElementById('insightMiniTableTitle');
+    const bodyEl = document.getElementById('insightMiniTableBody');
+
+    if(codeEl) codeEl.textContent = '-';
+    if(custEl) custEl.textContent = '-';
+    if(accEl) accEl.textContent = '-';
+    if(freqEl) freqEl.textContent = '-';
+    if(titleEl) titleEl.textContent = 'Insights Table';
+    if(bodyEl) bodyEl.innerHTML = `<tr><td colspan="2" class="p-1 text-center text-gray-400 italic">No schedule selected</td></tr>`;
+}
+
+window.updateEditingInsights = function(rowId) {
+    const panel = document.getElementById('editingInsightsPanel');
+    const codeEl = document.getElementById('insightCode');
+    const custEl = document.getElementById('insightCustomer');
+    const accEl = document.getElementById('insightAccount');
+    const freqEl = document.getElementById('insightFrequency');
+    const titleEl = document.getElementById('insightMiniTableTitle');
+    const bodyEl = document.getElementById('insightMiniTableBody');
+
+    if (!panel || !editingRowId || editingRowId !== rowId) return;
+
+    const rowData = supabaseData.find(r => String(r.id || r.CustomerCode) === String(rowId));
+    if (!rowData) return;
+
+    if(codeEl) codeEl.textContent = rowData.CustomerCode || '-';
+    if(custEl) custEl.textContent = rowData['Customer Name'] || '-';
+    if(accEl) accEl.textContent = rowData['Account'] || '-'; 
+    if(titleEl) titleEl.textContent = 'Insights table for - ' + (rowData['Customer Name'] || '-');
+
+    let count = 0;
+    let miniTableHTML = '';
+    
+    window.allDays.forEach(d => {
+        let inputEl = document.getElementById('edit_' + d);
+        let val = '';
+        
+        if (inputEl) {
+            val = inputEl.value.trim();
+        } else if (rowData[d] !== null && rowData[d] !== undefined) {
+            val = String(rowData[d]);
+        }
+
+        if (val !== '' && !isNaN(parseFloat(val))) {
+            count++;
+            let prefix = d.substring(0, 3);
+            let num = d.substring(3);
+            let fullName = `${window.dayNamesMap[prefix]} ${num}`;
+            
+            miniTableHTML += `
+                <tr class="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td class="p-0.5 px-1 text-gray-600 text-center text-[8px] sm:text-[9px] border-r border-gray-200">${fullName}</td>
+                    <td class="p-0.5 px-1 font-bold text-blue-600 text-center text-[8px] sm:text-[9px]">${val}</td>
+                </tr>
+            `;
+        }
+    });
+
+    if(freqEl) freqEl.textContent = count;
+    
+    if (count > 0) {
+        if(bodyEl) bodyEl.innerHTML = miniTableHTML;
+    } else {
+        if(bodyEl) bodyEl.innerHTML = `<tr><td colspan="2" class="p-1 text-center text-gray-400 italic">No schedules set</td></tr>`;
+    }
+
+    panel.classList.remove('hidden');
+};
+
 function renderMasterlist() {
     masterlistTableBody.innerHTML = '';
     if(supabaseData.length === 0) {
@@ -170,7 +268,6 @@ function renderMasterlist() {
             </td>`;
         }
 
-        // FIX: Pinaliit ang font size at padding sa lahat
         tr += `<td class="p-0.5 sm:p-1 border-r border-gray-100 align-middle bg-transparent"><div class="w-[30px] mx-auto text-center text-gray-400 font-bold text-[8px] sm:text-[10px]">${rowIndex++}</div></td>`;
         tr += `<td class="p-0.5 sm:p-1 border-r border-gray-100 align-middle bg-transparent"><div class="w-full mx-auto text-center font-mono font-bold text-blue-600 text-[8px] sm:text-[10px] whitespace-nowrap">${row.CustomerCode || '-'}</div></td>`;
 
@@ -212,15 +309,16 @@ function renderMasterlist() {
             if(isEditing) {
                 const val = row[d];
                 if (window.isValidStrNum(val)) {
+                    // BAGO: In-apply ang inline style na text-align: center !important para puwersadong gitna
                     tr += `<td class="fixed-40 border-r border-gray-100 bg-blue-50 align-middle ${hideClass}" id="td_edit_${rowId}_${d}">
                             <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto flex justify-center items-center">
-                                <input type="text" inputmode="numeric" size="2" maxlength="3" id="edit_${d}" value="${val}" oninput="this.value=this.value.replace(/[^0-9]/g, ''); updateInlineFrequency('${rowId}')" class="edit-input">
+                                <input type="text" inputmode="numeric" size="2" maxlength="3" id="edit_${d}" value="${val}" oninput="this.value=this.value.replace(/[^0-9]/g, ''); updateInlineFrequency('${rowId}')" class="edit-input" style="text-align: center !important; margin: 0 auto !important;">
                             </div>
                            </td>`;
                 } else {
                     tr += `<td class="fixed-40 border-r border-gray-100 bg-blue-50 align-middle ${hideClass}" id="td_edit_${rowId}_${d}">
                             <div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto flex justify-center items-center">
-                                <button type="button" onclick="assignNextSequence('${rowId}', '${d}')" class="btn-add-seq" title="Add Next Sequence">+</button>
+                                <button type="button" onclick="assignNextSequence('${rowId}', '${d}')" class="btn-add-seq" title="Add Next Sequence" style="text-align: center !important; margin: 0 auto !important;">+</button>
                                 <input type="hidden" id="edit_${d}" value="">
                             </div>
                            </td>`;
@@ -260,7 +358,7 @@ window.assignNextSequence = function(rowId, day) {
     
     const td = document.getElementById(`td_edit_${rowId}_${day}`);
     if(td) {
-        td.innerHTML = `<div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto flex justify-center items-center"><input type="text" inputmode="numeric" size="2" maxlength="3" id="edit_${day}" value="${nextSeq}" oninput="this.value=this.value.replace(/[^0-9]/g, ''); updateInlineFrequency('${rowId}')" class="edit-input animate-[fadeIn_0.3s_ease-in-out]"></div>`;
+        td.innerHTML = `<div class="w-[40px] min-w-[40px] max-w-[40px] mx-auto flex justify-center items-center"><input type="text" inputmode="numeric" size="2" maxlength="3" id="edit_${day}" value="${nextSeq}" oninput="this.value=this.value.replace(/[^0-9]/g, ''); updateInlineFrequency('${rowId}')" class="edit-input animate-[fadeIn_0.3s_ease-in-out]" style="text-align: center !important; margin: 0 auto !important;"></div>`;
     }
     
     window.updateInlineFrequency(rowId);
@@ -288,17 +386,23 @@ window.updateInlineFrequency = function(rowId) {
         trElem.classList.remove('blink-bg');
         if(freqCell) freqCell.classList.remove('text-red-600', 'font-bold');
     }
+
+    if(window.updateEditingInsights) {
+        window.updateEditingInsights(rowId);
+    }
 };
 
 window.startInlineEdit = function(id) {
     editingRowId = id;
     document.getElementById('floatingEditBar').classList.remove('hidden');
     renderMasterlist();
+    if(window.updateEditingInsights) window.updateEditingInsights(id);
 }
 
 window.cancelInlineEdit = function() {
     editingRowId = null;
     document.getElementById('floatingEditBar').classList.add('hidden');
+    clearInsightsPanel();
     renderMasterlist();
 }
 
@@ -332,6 +436,8 @@ window.saveCurrentEdit = function() {
     
     editingRowId = null;
     document.getElementById('floatingEditBar').classList.add('hidden');
+    clearInsightsPanel(); 
+    
     supabaseData = getOrderedSupabaseData(); 
     btnSaveCloud.classList.remove('hidden');
     renderMasterlist();

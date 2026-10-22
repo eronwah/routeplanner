@@ -11,7 +11,6 @@ body, html { overflow-x: hidden; }
     .auto-table th, .auto-table td { padding: 0.3rem 0.4rem; font-size: 0.7rem; }
 }
 
-/* FIX: Uniform at siksik na account logos para sa mobile */
 .account-logo { 
     height: 14px !important; 
     max-width: 55px !important; 
@@ -47,14 +46,16 @@ details > summary::-webkit-details-marker { display: none; }
     box-sizing: border-box !important;
 }
 
+/* SIKSIK AT NAKA-CENTER NA INPUTS */
 .edit-input { 
     width: 28px !important; 
     min-width: 28px !important; 
     max-width: 28px !important; 
     height: 22px !important;
+    line-height: 22px !important; /* Perfect Vertical Centering */
     margin: 0 auto !important;
     padding: 0 !important; 
-    text-align: center !important; 
+    text-align: center !important; /* Perfect Horizontal Centering */
     border: 1px solid #9ca3af; 
     border-radius: 4px; 
     font-weight: bold; 

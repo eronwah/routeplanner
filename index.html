@@ -63,6 +63,35 @@
                     <p class="text-red-700 text-[9px] sm:text-sm">Note: You can only access or view the Route Planner tab using a web browser on a desktop or laptop computer.</p>
                 </div>
 
+                <!-- EDITING INSIGHTS PANEL -->
+                <div id="editingInsightsPanel" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mb-4 shadow-sm w-full ml-auto max-w-2xl transition-all">
+                    <h3 class="font-bold text-blue-800 text-[10px] sm:text-xs mb-1.5 border-b border-blue-200 pb-1 flex items-center gap-2">
+                        <span>📊</span> Editing Insights
+                    </h3>
+                    <div class="flex flex-col md:flex-row gap-2 sm:gap-4 items-start">
+                        <div class="text-[9px] sm:text-[10px] text-gray-700 flex flex-col gap-0.5 w-full md:w-1/2">
+                            <div class="flex"><span class="font-bold w-20">Code:</span> <span id="insightCode" class="font-mono text-blue-600 font-bold">-</span></div>
+                            <div class="flex"><span class="font-bold w-20">Customer:</span> <span id="insightCustomer">-</span></div>
+                            <div class="flex"><span class="font-bold w-20">Account:</span> <span id="insightAccount">-</span></div>
+                            <div class="flex"><span class="font-bold w-20">Frequency:</span> <span id="insightFrequency" class="font-bold text-gray-900">-</span></div>
+                        </div>
+                        <div class="w-full md:w-1/2 flex flex-col items-center">
+                            <p id="insightMiniTableTitle" class="text-[8px] sm:text-[9px] font-bold text-gray-500 mb-1 uppercase tracking-wide text-center w-full">Insights Table</p>
+                            <table class="w-full sm:w-5/6 text-[8px] sm:text-[9px] text-center border border-gray-300 bg-white shadow-sm rounded overflow-hidden">
+                                <thead class="bg-gray-100 border-b border-gray-300">
+                                    <tr>
+                                        <th class="p-0.5 px-1 font-bold text-gray-700 w-1/2 text-center border-r border-gray-300">Category</th>
+                                        <th class="p-0.5 px-1 font-bold text-gray-700 w-1/2 text-center">Sequence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="insightMiniTableBody">
+                                    <tr><td colspan="2" class="p-1 text-center text-gray-400 italic">No schedule selected</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="hidden lg:block w-full mx-auto border border-gray-200 rounded-md overflow-x-auto max-h-[75vh] overflow-y-auto relative bg-white shadow-sm pb-16">
                     <table class="w-full bg-white text-left text-xs whitespace-nowrap auto-table min-w-[1000px]">
                         <thead class="bg-gray-100 border-b border-gray-200 sticky top-0 z-20 shadow-sm">
@@ -217,6 +246,8 @@
     </div>
 
     <!-- Modals -->
+    
+    <!-- CLEAR COLUMN SELECTION MODAL -->
     <div id="clearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
             <div class="text-orange-500 mb-3 flex justify-center">
@@ -233,6 +264,22 @@
             <div class="flex gap-3 justify-center">
                 <button onclick="closeClearColumnModal()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
                 <button onclick="confirmClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Clear Column</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BAGO: CONFIRMATION MODAL PARA SA CLEAR COLUMN -->
+    <div id="confirmClearColumnModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center relative">
+            <div class="text-orange-500 mb-3 flex justify-center">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Are you sure?</h3>
+            <p class="text-sm text-gray-600 mb-6">You are about to clear all schedules for <span id="confirmColumnNameText" class="font-bold text-gray-900"></span>. You still need to click <b>Save to Cloud</b> after this.</p>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="cancelConfirmClearColumn()" class="bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Cancel</button>
+                <button onclick="proceedClearColumn()" class="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-bold transition w-full">Yes, Clear</button>
             </div>
         </div>
     </div>
@@ -262,6 +309,7 @@
         </div>
     </div>
 
+    <!-- OTHER MODALS -->
     <div id="customerModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-4 sm:p-5 relative"><button id="closeModalBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button><h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2 text-center">Customer Details</h3><div id="modalContent" class="w-full"></div><div class="mt-4 text-center"><button id="closeModalBtnBottom" class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full">Close</button></div></div></div>
     <div id="weeklyModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative flex flex-col max-h-[85vh]"><div id="weeklyModalHeader" class="rounded-t-xl px-4 py-3 sm:px-5 sm:py-4 flex justify-between items-center transition-colors"><h3 id="weeklyModalTitle" class="text-lg font-bold text-white">Week Details</h3><button id="closeWeeklyModalBtn" class="text-white hover:text-gray-200 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div id="weeklyModalContent" class="p-4 sm:p-5 overflow-y-auto space-y-3 bg-gray-50 flex-1"></div><div class="p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeWeeklyModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>
     <div id="graphModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 transition-opacity"><div class="bg-white rounded-xl shadow-xl max-w-md w-full relative flex flex-col max-h-[85vh]"><div class="px-4 py-3 sm:px-4 sm:py-4 flex justify-between items-center bg-gray-50 border-b border-gray-200 rounded-t-xl"><h3 id="graphModalTitle" class="text-[13px] sm:text-sm font-bold text-gray-800 uppercase tracking-wide"></h3><button id="closeGraphModalBtn" class="text-gray-400 hover:text-gray-600 focus:outline-none ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div><div class="p-4 sm:p-5 overflow-y-auto flex-1"><div class="grid grid-cols-[auto_1fr] gap-x-4 text-xs sm:text-sm min-w-full" id="graphModalContent"></div></div><div class="p-3 sm:p-4 border-t border-gray-200 text-center bg-white rounded-b-xl"><button id="closeGraphModalBtnBottom" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition w-full sm:w-auto">Close</button></div></div></div>
